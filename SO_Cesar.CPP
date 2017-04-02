@@ -8,87 +8,41 @@
 /*------------------------------------------------------
 Declaracion de Estructuras
 -------------------------------------------------------*/
-
-//codigo obtenido de  http://samwho.co.uk/blog/2013/06/01/context-switching-on-x86
 	struct PBI
 	{
 		int ID;
+		int Estado;  //{ Corriendo = 1, Listo = 2, Pausa = 3, Removido = 4};
+		int IsKilled; //agregar 0-no, 1-si
+		int quantum;
+		int inicioX;
+		int inicioY;
+		int i;
+		int j;
+		int tiempoUso; //Si se mata el proceso, este tiempo se reinicia
+		int posVentana;
+
+		//Contexto en el CPU
+		int banderas;
 		int IP;
-		enum int State; //agregar estados
-		struct PBI *parent; //Creo que no es necesario ya que todos los procesos son independientes
-							// y no vamos a usar threads
-		struct context *context;     // swtch() here to run process
-		enum int IsKilled; //agregar 0-no, 1-si
-		double quantum;
-		struct trapframe *tf;        // Trap frame for current syscall
-									 /*
-									 *	Agregar colas de mouse ??
-									 */
-
+		int CS;
+		int ax;
+		int bx;
+		int cx;
+		int dx;
 	};
-
-	struct CLICK
-	{
-		int X;
-		int Y;
-		int Activo; //0 = no, todo lo demás si
-	}
-
-	struct trapframe {
-		// registers as pushed by pusha
-		int edi;
-		int esi;
-		int ebp;
-		int oesp;      // useless & ignored
-		int ebx;
-		int edx;
-		int ecx;
-		int eax;
-
-		// rest of trap frame
-		short gs;
-		short padding1;
-		short fs;
-		short padding2;
-		short es;
-		short padding3;
-		short ds;
-		short padding4;
-		int trapno;
-
-		// below here defined by x86 hardware
-		int err;
-		int eip;
-		short cs;
-		short padding5;
-		int eflags;
-
-		// below here only when crossing rings, such as from user to kernel
-		int esp;
-		short ss;
-		short padding6;
-	};
-
-	struct context {
-		uint edi;
-		uint esi;
-		uint ebx;
-		uint ebp;
-		uint eip;
-	};
-
 
 /*------------------------------------------------------
 Declaracion de Variables Globales
 -------------------------------------------------------*/
-	//Cada ventan es de 24*8
-	CLICK CVentana1[192];
-	CLICK CVentana2[192];
-	CLICK CVentana3[192];
-	CLICK CVentana4[192];
-	CLICK CVentana5[192];
-	CLICK CVentana6[192];
-
+	//Cada ventan es de 80x18
+	int CliksVentanas[1440] = {0};
+	int inicioX;
+	int inicioY;
+	int iVentana;
+	int jVentana;
+	int PBIActual = 0;
+	int posVentana;
+	int pintar = 1;
 	PBI Ventanas[7];
 
 	char instruccion[40]= "";
@@ -109,6 +63,7 @@ Declaracion de prototipos
 	void RenderKernel();
 	void imprimirCaracterNVeces(char caracter, int cant);
 	void Ventana();
+	void Idle();
 
 	//Teclado
 	void Gramatica();
@@ -223,8 +178,40 @@ Core Kernel
 void CoreKernel()
 {
 	contInstruccion = 0;
-	Temporizador(); //Ingresa el residente del temporizador en la interrupcion 1C
+	for	(int i = 1; i < 7; i++)
+	{
+		Ventanas[i].ID = i;
+		Ventanas[i].Estado = 4;
+		Ventanas[i].IsKilled = 1;
+		Ventanas[i].quantum = 500;
 
+		if(i<4)
+		{
+			Ventanas[i].inicioX = 2 + (i-1)*26;
+			Ventanas[i].inicioY = 1;
+		}
+		else
+		{
+			Ventanas[i].inicioX = 2 + (i-4)*26;
+			Ventanas[i].inicioY = 11;
+		}	
+
+		Ventanas[i].i = Ventanas[i].inicioX;
+		Ventanas[i].j = Ventanas[i].inicioY;
+
+		Ventanas[i].tiempoUso  = 0;
+		Ventanas[i].banderas = 0;
+		
+		Ventanas[i].IP = (int)&Ventana;
+
+		asm mov Ventanas[i].CS, CS;
+		Ventanas[i].ax = 0;
+		Ventanas[i].bx = 0;
+		Ventanas[i].cx = 0;
+		Ventanas[i].dx = 0;
+
+	}
+	Temporizador(); //Ingresa el residente del temporizador en la interrupcion 1C
 }
 
 void Temporizador()
@@ -232,6 +219,8 @@ void Temporizador()
 	ptTick = getvect(0x1C);
 	setvect(0x1C, tick);
 }
+
+
 
 void interrupt tick(...)
 {
@@ -251,6 +240,7 @@ void interrupt tick(...)
 		//Cambiar los datos globales en base al PCB nuevo
 }
 
+//Captura los datos ingresan al teclado
 void LeerTeclado()
 {
 	if(kbhit()) 
@@ -297,12 +287,6 @@ void LeerTeclado()
 				}
 			}
 		}
-			//colocar limites de cuanto es lo maximo que puede escribir
-			//configurar el backspace
-			//hay que almacenar el dato en un string global
-			//Llamar a la gramatica
-			//Entre la gramatica se debe de incluir la posibilidad salir
-			//Para salir cambiar la bandera
 	}
 }
 
@@ -311,6 +295,14 @@ void LimpiarInstruccion()
 	for (int i = 0; i < 40; ++i)
 	{
 		instruccion[i] = 0;
+	}
+}
+
+void LimpiarLexema()
+{
+	for (int i = 0; i < 40; ++i)
+	{
+		lexema[i] = 0;
 	}
 }
 
@@ -504,26 +496,21 @@ void Gramatica()
 	}
 }
 
-void LimpiarLexema()
-{
-	for (int i = 0; i < 40; ++i)
-	{
-		lexema[i] = 0;
-	}
-}
-
 /*------------------------------------------------------
 Interrupción del mouse
 ------------------------------------------------------*/
+//Captura los clicks del usuario
 void EscribirClick()
 {
 	_setcursortype(_NORMALCURSOR);
 	MostrarPuntero();
 	if(IsClick() == 1)
 	{
-		gotoxy(CordX()+1,CordY()+1);
-		printf(".");
-		gotoxy(posX, posY);
+		int x = CordX();
+		int y = CordY();
+		//Ingresar el Click a la ventana
+		int pos = y*80 + x;
+		CliksVentanas[pos] = 1;
 	}
 
 	_setcursortype(_NORMALCURSOR);
@@ -566,11 +553,42 @@ void Ventana()
 {
 	while(1)
 	{
+		delay(5);
+		for(iVentana = inicioX; iVentana < inicioX + 24; iVentana++)
+		{
+			for(jVentana = inicioY; jVentana < inicioY + 8; jVentana++)
+			{
+				posVentana = jVentana*80 + iVentana;
+				if(!CliksVentanas[posVentana])
+				{
+					gotoxy(iVentana, jVentana);
+					if(pintar)
+					{
+						printf(".");
+					}
+					else
+					{
+						printf(" ");
+					}
+					
+					gotoxy(posX, posY);
+				}
+			}
+		}
 		//Basicamente es un while infinito con un for interno
 		//REGRESAR EL CURSOR A DONDE ESTABA ANTES DE COLOCAR EL PUNTO
 	}
 }
 
+void Idle()
+{
+	while(1)
+	{
+		delay(5);
+	}
+}             
+
+/*
 #pragma region Cambio de Contexto Experimental
 void syscall()
 {
@@ -635,3 +653,4 @@ void TrapFrameSetUp()
 }
 
 #pragma endregion
+*/
