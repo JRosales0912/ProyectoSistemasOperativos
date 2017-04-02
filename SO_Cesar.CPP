@@ -8,7 +8,7 @@
 /*------------------------------------------------------
 Declaracion de Estructuras
 -------------------------------------------------------*/
-	struct PBI
+	struct PCB
 	{
 		int ID;
 		int Estado;  //{ Corriendo = 1, Listo = 2, Pausa = 3, Removido = 4};
@@ -40,10 +40,10 @@ Declaracion de Variables Globales
 	int inicioY;
 	int iVentana;
 	int jVentana;
-	int PBIActual = 0;
+	int PCBActual = 0;
 	int posVentana;
 	int pintar = 1;
-	PBI Ventanas[7];
+	PCB Ventanas[7];
 
 	char instruccion[40]= "";
 	char lexema[40]= "";
@@ -91,10 +91,7 @@ int main()
 	delay(5);
 	gotoxy(posX, posY);
 	int bandera = 1;
-	while(bandera)   //Nunca sale del programa
-	{
-
-	}
+	Idle();
 	return 0;
 }
 
@@ -203,14 +200,39 @@ void CoreKernel()
 		Ventanas[i].banderas = 0;
 		
 		Ventanas[i].IP = (int)&Ventana;
+		int cs_;
+		asm{
+			mov ax, cs 
+			mov cs_, ax
+		}
 
-		asm mov Ventanas[i].CS, CS;
+		Ventanas[i].CS = cs_;
 		Ventanas[i].ax = 0;
 		Ventanas[i].bx = 0;
 		Ventanas[i].cx = 0;
 		Ventanas[i].dx = 0;
-
 	}
+
+	Ventanas[0].ID = 0;
+	Ventanas[0].Estado = 1;
+	Ventanas[0].IsKilled = 0;
+	Ventanas[0].quantum = 500;
+
+	Ventanas[0].tiempoUso  = 0;
+	Ventanas[0].banderas = 0;
+	Ventanas[0].IP = (int)&Idle;
+	int cs_;
+	asm{
+		mov ax, cs 
+		mov cs_, ax
+	}
+
+	Ventanas[0].CS = cs_;
+	Ventanas[0].ax = 0;
+	Ventanas[0].bx = 0;
+	Ventanas[0].cx = 0;
+	Ventanas[0].dx = 0;
+
 	Temporizador(); //Ingresa el residente del temporizador en la interrupcion 1C
 }
 
@@ -219,8 +241,6 @@ void Temporizador()
 	ptTick = getvect(0x1C);
 	setvect(0x1C, tick);
 }
-
-
 
 void interrupt tick(...)
 {
@@ -394,99 +414,101 @@ void Gramatica()
 	{
 		printf("Error: Se necesita una instruccion valida");
 	}
-
-	Token = TomaToken(i);
-	numVentana = lexema[0];
-
-	//Verifico el numero de ventana
-	if (Token != 2 || atoi(lexema) < 1 || atoi(lexema) > 6)
+	else
 	{
-		printf("Error: El numero de ventan ingresado no es valido");
-	}
-	else 
-	{
-		if (strcmp(accion,"stats") == 0)
+		Token = TomaToken(i);
+		numVentana = lexema[0];
+
+		//Verifico el numero de ventana
+		if (Token != 2 || atoi(lexema) < 1 || atoi(lexema) > 6)
 		{
-			//stats ##
-			printf("Estadisticas: ");
-			//leo opciones de estadísticas
-			Token = TomaToken(i);
-			if (Token == 2)
+			printf("Error: El numero de ventana ingresado no es valido");
+		}
+		else 
+		{
+			if (strcmp(accion,"stats") == 0)
 			{
-				if (strcmp(lexema, "0") != 0)
+				//stats ##
+				printf("Estadisticas: ");
+				//leo opciones de estadísticas
+				Token = TomaToken(i);
+				if (Token == 2)
 				{
-					printf("Error: La estadistica seleccionada no existe");
-				}
-				//CODIGO SI ESCOGIÓ STATS CON PARÁMETRO 0
-			}
-			else
-			{
-				if (Token == 3)
-				{
-					Token = TomaToken(i);
-					if (Token != 2 && strcmp(lexema, "1") != 0)
+					if (strcmp(lexema, "0") != 0)
 					{
 						printf("Error: La estadistica seleccionada no existe");
 					}
-					//CODIGO SI ESCOGIÓ STATS CON PARÁMETRO -1
+					//CODIGO SI ESCOGIÓ STATS CON PARÁMETRO 0
 				}
 				else
 				{
-					printf("Error: La estadistica seleccionada no existe");
-				}
-			}
-		}
-		else
-		{
-			if (strcmp(accion,"quantum") == 0)
-			{
-				printf("Nuevo Quantum: ");
-				//leo milisegundos
-				Token = TomaToken(i);
-				if (Token != 2)
-				{
-					printf("Error: Ingrese un quantum valido");
-				}
-				else
-				{
-					int milisegundos = atoi(lexema);
+					if (Token == 3)
+					{
+						Token = TomaToken(i);
+						if (Token != 2 && strcmp(lexema, "1") != 0)
+						{
+							printf("Error: La estadistica seleccionada no existe");
+						}
+						//CODIGO SI ESCOGIÓ STATS CON PARÁMETRO -1
+					}
+					else
+					{
+						printf("Error: La estadistica seleccionada no existe");
+					}
 				}
 			}
 			else
 			{
-				//todos los demas que no sean estos dos que traen parámetros
-				if (strcmp(accion,"add") == 0)
+				if (strcmp(accion,"quantum") == 0)
 				{
-					printf("Nueva ventana: ");
-					//Codigo de add
-				}
-				else
-				{
-					if (strcmp(accion,"pause") == 0)
+					printf("Nuevo Quantum: ");
+					//leo milisegundos
+					Token = TomaToken(i);
+					if (Token != 2)
 					{
-						printf("Ventana pausada: ");
-						imprimirCaracterNVeces(numVentana, 1);
-						//Codigo de pause
+						printf("Error: Ingrese un quantum valido");
 					}
 					else
 					{
-						if (strcmp(accion,"remove") == 0)
+						int milisegundos = atoi(lexema);
+					}
+				}
+				else
+				{
+					//todos los demas que no sean estos dos que traen parámetros
+					if (strcmp(accion,"add") == 0)
+					{
+						printf("Nueva ventana: ");
+						//Codigo de add
+					}
+					else
+					{
+						if (strcmp(accion,"pause") == 0)
 						{
-							printf("Eliminar ventana: ");
+							printf("Ventana pausada: ");
 							imprimirCaracterNVeces(numVentana, 1);
-							//Codigo de remove
+							//Codigo de pause
 						}
 						else
 						{
-							if (strcmp(accion,"clear") == 0)
+							if (strcmp(accion,"remove") == 0)
 							{
-								printf("Vaciar vetana: ");
+								printf("Eliminar ventana: ");
 								imprimirCaracterNVeces(numVentana, 1);
-								//Codigo de clear
+								//Codigo de remove
 							}
 							else
 							{
-								printf("Error: Se necesita una instruccion valida");
+								if (strcmp(accion,"clear") == 0)
+								{
+									printf("Vaciar vetana: ");
+									imprimirCaracterNVeces(numVentana, 1);
+									//Codigo de clear
+								}
+								else
+								{
+									printf("Error: Se necesita una instruccion valida");
+								}
 							}
 						}
 					}
