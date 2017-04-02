@@ -248,6 +248,7 @@ void interrupt tick(...)
 	EscribirClick();
 	LeerTeclado();
 
+	
 	//Inicia la conmutacion de procesos.....
 	//Verificar si el quantum del proceso se termino
 	//En caso haya terminado el quantum
