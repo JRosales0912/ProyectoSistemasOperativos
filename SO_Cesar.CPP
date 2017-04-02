@@ -8,10 +8,22 @@
 /*------------------------------------------------------
 Declaracion de Estructuras
 -------------------------------------------------------*/
+
+//codigo obtenido de  http://samwho.co.uk/blog/2013/06/01/context-switching-on-x86
 	struct PBI
 	{
 		int ID;
 		int IP;
+		enum int State; //agregar estados
+		struct PBI *parent; //Creo que no es necesario ya que todos los procesos son independientes
+							// y no vamos a usar threads
+		struct context *context;     // swtch() here to run process
+		enum int IsKilled; //agregar 0-no, 1-si
+		double quantum;
+		struct trapframe *tf;        // Trap frame for current syscall
+									 /*
+									 *	Agregar colas de mouse ??
+									 */
 
 	};
 
@@ -21,6 +33,49 @@ Declaracion de Estructuras
 		int Y;
 		int Activo; //0 = no, todo lo demás si
 	}
+
+	struct trapframe {
+		// registers as pushed by pusha
+		int edi;
+		int esi;
+		int ebp;
+		int oesp;      // useless & ignored
+		int ebx;
+		int edx;
+		int ecx;
+		int eax;
+
+		// rest of trap frame
+		short gs;
+		short padding1;
+		short fs;
+		short padding2;
+		short es;
+		short padding3;
+		short ds;
+		short padding4;
+		int trapno;
+
+		// below here defined by x86 hardware
+		int err;
+		int eip;
+		short cs;
+		short padding5;
+		int eflags;
+
+		// below here only when crossing rings, such as from user to kernel
+		int esp;
+		short ss;
+		short padding6;
+	};
+
+	struct context {
+		uint edi;
+		uint esi;
+		uint ebx;
+		uint ebp;
+		uint eip;
+	};
 
 
 /*------------------------------------------------------
@@ -516,3 +571,67 @@ void Ventana()
 	}
 }
 
+#pragma region Cambio de Contexto Experimental
+void syscall()
+{
+	int num;
+
+	// Get the syscall number from eax
+	num = proc->tf->eax;
+
+	// Check that the syscall number is greater than 0, inside the range of total
+	// syscalls and that a function pointer exists for that syscall number.
+	if (num > 0 && num < NELEM(syscalls) && syscalls[num])
+	{
+		// Set eax to the return value of the syscall.
+		proc->tf->eax = syscalls[num]();
+	}
+	else
+	{
+		// Else print an error and return -1 to the user program.
+		cprintf("%d %s: unknown sys call %d\n",
+			proc->pid, proc->name, num);
+		proc->tf->eax = -1;
+	}
+}
+
+void TrapFrameSetUp()
+{
+	__asm
+	{
+		.globl alltraps
+		alltraps :
+		# Build trap frame.
+			pushl %ds
+			pushl %es
+			pushl %fs
+			pushl %gs
+			pushal
+
+			# Set up data and per - cpu segments.
+			movw $(SEG_KDATA << 3), %ax
+			movw %ax, %ds
+			movw %ax, %es
+			movw $(SEG_KCPU << 3), %ax
+			movw %ax, %fs
+			movw %ax, %gs
+
+			# Call trap(tf), where tf = %esp
+			pushl %esp
+			call trap # < -ENTRY INTO C TRAP FUNCTION
+			addl $4, %esp
+
+			# Return falls through to trapret...
+			.globl trapret
+			trapret :
+		popal
+			popl %gs
+			popl %fs
+			popl %es
+			popl %ds
+			addl $0x8, %esp  # trapno and errcode
+			iret
+	}
+}
+
+#pragma endregion
