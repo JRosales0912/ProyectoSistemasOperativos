@@ -46,6 +46,13 @@ Declaracion de Variables Globales
 	int pintar = 1;
 	PCB Ventanas[7];
 
+	//Para Instrucciones
+	int ventanaObjetivo = 0;
+	int i = 0;
+	int Token = 0;
+	char accion[40] = "";
+	int milisegundos = 0;
+
 	char instruccion[40]= "";
 	char lexema[40]= "";
 	int contInstruccion;
@@ -418,10 +425,8 @@ void Gramatica()
 	imprimirCaracterNVeces(32, 60);
 	gotoxy(posX,posY);
 
-	int i = 0;
-	int Token = TomaToken(i);
-	char accion[40] = "";
-	int numVentana;
+	Token = TomaToken(i);
+
 	for(int x = 0; x < contLexema; x++)
 	{
 		accion[x] = lexema[x];
@@ -436,10 +441,10 @@ void Gramatica()
 	else
 	{
 		Token = TomaToken(i);
-		numVentana = lexema[0];
+		ventanaObjetivo = atoi(lexema);
 
 		//Verifico el numero de ventana
-		if (Token != 2 || atoi(lexema) < 1 || atoi(lexema) > 6)
+		if (Token != 2 || ventanaObjetivo < 1 || ventanaObjetivo > 6)
 		{
 			printf("Error: El numero de ventana ingresado no es valido");
 		}
@@ -489,7 +494,8 @@ void Gramatica()
 					}
 					else
 					{
-						int milisegundos = atoi(lexema);
+						milisegundos = atoi(lexema);
+						
 					}
 				}
 				else
