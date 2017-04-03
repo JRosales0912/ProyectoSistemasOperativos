@@ -35,6 +35,7 @@ Declaracion de Estructuras
 Declaracion de Variables Globales
 -------------------------------------------------------*/
 	//Cada ventan es de 80x18
+	int QuantumFaltante;
 	int CliksVentanas[1440] = {0};
 	int inicioX;
 	int inicioY;
@@ -87,10 +88,25 @@ int main()
 	posX = 10;
 	posY = 19;
 	RenderKernel(); //Se ejecuta el proceso del Render Kernel, se pinta la pantalla
-	CoreKernel(); //Se realiza la incialización de procesos
+	//CoreKernel(); //Se realiza la incialización de procesos
 	delay(5);
 	gotoxy(posX, posY);
 	int bandera = 1;
+	QuantumFaltante = 91;
+	int x;
+	asm mov x, ax;
+	printf("%d ", x);
+	asm mov x, bx;
+	printf("%d ", x);
+	asm mov x, cx;
+	printf("%d ", x);
+	asm mov x, dx;
+	printf("%d ", x);
+	asm mov x, cs;
+	printf("%d ", x);	
+
+	asm push 1234;
+	
 	Idle();
 	return 0;
 }
@@ -248,10 +264,12 @@ void interrupt tick(...)
 	EscribirClick();
 	LeerTeclado();
 
-	
-	//Inicia la conmutacion de procesos.....
-	//Verificar si el quantum del proceso se termino
-	//En caso haya terminado el quantum
+	Ventanas[PCBActual].tiempoUso++;
+	QuantumFaltante--;
+	if(QuantumFaltante = 0)
+	{
+		//Inicia la comnutación
+	}
 		//Sacar datos de la pila (registros, y de mas cosas importantes)
 		//Almacenar esos datos en el PCB actual
 		//Obtener datos globales i almacenar en el PCB actual (contador)
@@ -533,7 +551,10 @@ void EscribirClick()
 		int y = CordY();
 		//Ingresar el Click a la ventana
 		int pos = y*80 + x;
-		CliksVentanas[pos] = 1;
+		if(pos < 1440)
+		{
+			CliksVentanas[pos] = 1;
+		}
 	}
 
 	_setcursortype(_NORMALCURSOR);
@@ -605,75 +626,40 @@ void Ventana()
 
 void Idle()
 {
+	int x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13;
+	asm{
+		pop x1
+		pop x2
+		pop x3
+		pop x4 
+		pop x5
+		pop x6
+		pop x7
+		pop x8
+		pop x9
+		pop x10
+		pop x11
+		pop x12
+		pop x13
+	}
+	printf("call ");
+	printf("%d ", x1);
+	printf("%d ", x2);
+	printf("%d ", x3);
+	printf("%d ", x4);
+	printf("%d ", x5);
+	printf("%d ", x6);
+	printf("%d ", x7);
+	printf("%d ", x8);
+	printf("%d ", x9);
+	printf("%d ", x10);
+	printf("%d ", x11);
+	printf("%d ", x12);
+	printf("%d ", x13);
+
 	while(1)
 	{
 		delay(5);
 	}
 }             
 
-/*
-#pragma region Cambio de Contexto Experimental
-void syscall()
-{
-	int num;
-
-	// Get the syscall number from eax
-	num = proc->tf->eax;
-
-	// Check that the syscall number is greater than 0, inside the range of total
-	// syscalls and that a function pointer exists for that syscall number.
-	if (num > 0 && num < NELEM(syscalls) && syscalls[num])
-	{
-		// Set eax to the return value of the syscall.
-		proc->tf->eax = syscalls[num]();
-	}
-	else
-	{
-		// Else print an error and return -1 to the user program.
-		cprintf("%d %s: unknown sys call %d\n",
-			proc->pid, proc->name, num);
-		proc->tf->eax = -1;
-	}
-}
-
-void TrapFrameSetUp()
-{
-	__asm
-	{
-		.globl alltraps
-		alltraps :
-		# Build trap frame.
-			pushl %ds
-			pushl %es
-			pushl %fs
-			pushl %gs
-			pushal
-
-			# Set up data and per - cpu segments.
-			movw $(SEG_KDATA << 3), %ax
-			movw %ax, %ds
-			movw %ax, %es
-			movw $(SEG_KCPU << 3), %ax
-			movw %ax, %fs
-			movw %ax, %gs
-
-			# Call trap(tf), where tf = %esp
-			pushl %esp
-			call trap # < -ENTRY INTO C TRAP FUNCTION
-			addl $4, %esp
-
-			# Return falls through to trapret...
-			.globl trapret
-			trapret :
-		popal
-			popl %gs
-			popl %fs
-			popl %es
-			popl %ds
-			addl $0x8, %esp  # trapno and errcode
-			iret
-	}
-}
-
-#pragma endregion
-*/
