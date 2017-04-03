@@ -8,6 +8,15 @@
 /*------------------------------------------------------
 Declaracion de Estructuras
 -------------------------------------------------------*/
+	struct ToDo
+	{
+		int comando; // { Add = 1, Pause = 2, Remove = 3, Clear = 4, Quantum = 5, Stats = 6, Blinkear = 7};
+		//Coordenadas para blinkear si comando = 7
+		int x;// Si comando = 5 guardo milisegundo si comando = 6 guardo tipo de estadísticas
+		int y;
+	};
+
+	
 	struct PCB
 	{
 		int ID;
@@ -20,6 +29,10 @@ Declaracion de Estructuras
 		int j;
 		int tiempoUso; //Si se mata el proceso, este tiempo se reinicia
 		int posVentana;
+		
+		//Lista de comandos a ejecutar
+		ToDo List[30];
+		int finLista;
 
 		//Contexto en el CPU
 		int banderas;
@@ -47,11 +60,10 @@ Declaracion de Variables Globales
 	PCB Ventanas[7];
 
 	//Para Instrucciones
-	int ventanaObjetivo = 0;
+	int numVentana = 0;
 	int i = 0;
 	int Token = 0;
 	char accion[40] = "";
-	int milisegundos = 0;
 
 	char instruccion[40]= "";
 	char lexema[40]= "";
@@ -112,7 +124,7 @@ int main()
 	asm mov x, cs;
 	printf("%d ", x);	
 
-	asm push 1234;
+	//asm push 1234;
 	
 	Idle();
 	return 0;
@@ -222,6 +234,8 @@ void CoreKernel()
 		Ventanas[i].tiempoUso  = 0;
 		Ventanas[i].banderas = 0;
 		
+		Ventanas[i].finLista = 0;
+		
 		Ventanas[i].IP = (int)&Ventana;
 		int cs_;
 		asm{
@@ -273,7 +287,7 @@ void interrupt tick(...)
 
 	Ventanas[PCBActual].tiempoUso++;
 	QuantumFaltante--;
-	if(QuantumFaltante = 0)
+	if(QuantumFaltante == 0)
 	{
 		//Inicia la comnutación
 	}
@@ -441,10 +455,10 @@ void Gramatica()
 	else
 	{
 		Token = TomaToken(i);
-		ventanaObjetivo = atoi(lexema);
+		numVentana = atoi(lexema);
 
 		//Verifico el numero de ventana
-		if (Token != 2 || ventanaObjetivo < 1 || ventanaObjetivo > 6)
+		if (Token != 2 || numVentana < 1 || numVentana > 6)
 		{
 			printf("Error: El numero de ventana ingresado no es valido");
 		}
@@ -454,6 +468,7 @@ void Gramatica()
 			{
 				//stats ##
 				printf("Estadisticas: ");
+				Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 6;
 				//leo opciones de estadísticas
 				Token = TomaToken(i);
 				if (Token == 2)
@@ -463,6 +478,8 @@ void Gramatica()
 						printf("Error: La estadistica seleccionada no existe");
 					}
 					//CODIGO SI ESCOGIÓ STATS CON PARÁMETRO 0
+					Ventanas[numVentana].List[Ventanas[numVentana].finLista].x = 0;
+					Ventanas[numVentana].finLista++;
 				}
 				else
 				{
@@ -474,6 +491,8 @@ void Gramatica()
 							printf("Error: La estadistica seleccionada no existe");
 						}
 						//CODIGO SI ESCOGIÓ STATS CON PARÁMETRO -1
+						Ventanas[numVentana].List[Ventanas[numVentana].finLista].x = -1;
+						Ventanas[numVentana].finLista++;
 					}
 					else
 					{
@@ -494,8 +513,11 @@ void Gramatica()
 					}
 					else
 					{
-						milisegundos = atoi(lexema);
-						
+						//milisegundos = atoi(lexema);
+						//Ventanas[numVentana].List[Ventanas[numVentana].finLista] = {5, atoi(lexema), 0};
+						Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 5;
+						Ventanas[numVentana].List[Ventanas[numVentana].finLista].x = atoi(lexema);
+						Ventanas[numVentana].finLista++;
 					}
 				}
 				else
@@ -504,7 +526,9 @@ void Gramatica()
 					if (strcmp(accion,"add") == 0)
 					{
 						printf("Nueva ventana: ");
-						//Codigo de add
+
+						Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 1;
+						Ventanas[numVentana].finLista++;
 					}
 					else
 					{
@@ -512,7 +536,9 @@ void Gramatica()
 						{
 							printf("Ventana pausada: ");
 							imprimirCaracterNVeces(numVentana, 1);
-							//Codigo de pause
+
+							Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 2;
+							Ventanas[numVentana].finLista++;
 						}
 						else
 						{
@@ -520,7 +546,9 @@ void Gramatica()
 							{
 								printf("Eliminar ventana: ");
 								imprimirCaracterNVeces(numVentana, 1);
-								//Codigo de remove
+
+								Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 3;
+								Ventanas[numVentana].finLista++;
 							}
 							else
 							{
@@ -528,7 +556,8 @@ void Gramatica()
 								{
 									printf("Vaciar vetana: ");
 									imprimirCaracterNVeces(numVentana, 1);
-									//Codigo de clear
+									Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 4;
+									Ventanas[numVentana].finLista++;
 								}
 								else
 								{
