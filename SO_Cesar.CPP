@@ -10,10 +10,9 @@ Declaracion de Estructuras
 -------------------------------------------------------*/
 	struct ToDo
 	{
-		int comando; // { Add = 1, Pause = 2, Remove = 3, Clear = 4, Quantum = 5, Stats = 6, Blinkear = 7};
+		int comando; // { Add = 1, Pause = 2, Remove = 3, Clear = 4, Quantum = 5, Stats = 6};
 		//Coordenadas para blinkear si comando = 7
-		int x;// Si comando = 5 guardo milisegundo si comando = 6 guardo tipo de estadísticas
-		int y;
+		int parametro;// Si comando = 5 guardo milisegundo si comando = 6 guardo tipo de estadísticas
 	};
 
 	
@@ -21,7 +20,6 @@ Declaracion de Estructuras
 	{
 		int ID;
 		int Estado;  //{ Corriendo = 1, Listo = 2, Pausa = 3, Removido = 4};
-		int IsKilled; //agregar 0-no, 1-si
 		int quantum;
 		int inicioX;
 		int inicioY;
@@ -33,6 +31,7 @@ Declaracion de Estructuras
 		//Lista de comandos a ejecutar
 		ToDo List[30];
 		int finLista;
+		int inicioLista;
 
 		//Contexto en el CPU
 		int banderas;
@@ -48,6 +47,7 @@ Declaracion de Estructuras
 Declaracion de Variables Globales
 -------------------------------------------------------*/
 	//Cada ventan es de 80x18
+	int TiempoTotal;
 	int QuantumFaltante;
 	int CliksVentanas[1440] = {0};
 	int inicioX;
@@ -64,6 +64,8 @@ Declaracion de Variables Globales
 	int i = 0;
 	int Token = 0;
 	char accion[40] = "";
+
+	int banderaAccion = 0;
 
 	char instruccion[40]= "";
 	char lexema[40]= "";
@@ -83,6 +85,7 @@ Declaracion de prototipos
 	void RenderKernel();
 	void imprimirCaracterNVeces(char caracter, int cant);
 	void Ventana();
+	void Acciones(ToDo com);
 	void Idle();
 
 	//Teclado
@@ -110,22 +113,8 @@ int main()
 	//CoreKernel(); //Se realiza la incialización de procesos
 	delay(5);
 	gotoxy(posX, posY);
-	int bandera = 1;
-	QuantumFaltante = 91;
-	int x;
-	asm mov x, ax;
-	printf("%d ", x);
-	asm mov x, bx;
-	printf("%d ", x);
-	asm mov x, cx;
-	printf("%d ", x);
-	asm mov x, dx;
-	printf("%d ", x);
-	asm mov x, cs;
-	printf("%d ", x);	
-
-	//asm push 1234;
 	
+	QuantumFaltante = 91;
 	Idle();
 	return 0;
 }
@@ -209,12 +198,12 @@ Core Kernel
 ------------------------------------------------------*/
 void CoreKernel()
 {
+	TiempoTotal = 0;
 	contInstruccion = 0;
 	for	(int i = 1; i < 7; i++)
 	{
 		Ventanas[i].ID = i;
 		Ventanas[i].Estado = 4;
-		Ventanas[i].IsKilled = 1;
 		Ventanas[i].quantum = 500;
 
 		if(i<4)
@@ -235,6 +224,7 @@ void CoreKernel()
 		Ventanas[i].banderas = 0;
 		
 		Ventanas[i].finLista = 0;
+		Ventanas[i].inicioLista = 0;
 		
 		Ventanas[i].IP = (int)&Ventana;
 		int cs_;
@@ -252,7 +242,6 @@ void CoreKernel()
 
 	Ventanas[0].ID = 0;
 	Ventanas[0].Estado = 1;
-	Ventanas[0].IsKilled = 0;
 	Ventanas[0].quantum = 500;
 
 	Ventanas[0].tiempoUso  = 0;
@@ -281,23 +270,29 @@ void Temporizador()
 
 void interrupt tick(...)
 {
+	TiempoTotal++;
 	(*ptTick)(...); // Executing timer original interrupt
 	EscribirClick();
 	LeerTeclado();
-
-	Ventanas[PCBActual].tiempoUso++;
-	QuantumFaltante--;
-	if(QuantumFaltante == 0)
+	
+	//Reviso para no iterrumpir una acción
+	if(!banderaAccion)
 	{
-		//Inicia la comnutación
-	}
-		//Sacar datos de la pila (registros, y de mas cosas importantes)
-		//Almacenar esos datos en el PCB actual
-		//Obtener datos globales i almacenar en el PCB actual (contador)
-		//Obtener el PCB que le toca acceder al procesador
-		//Tomar los datos del PCB que sean necesarios para ingresar en la pila
-		//Ingresar los datos a la pila
-		//Cambiar los datos globales en base al PCB nuevo
+		Ventanas[PCBActual].tiempoUso++;
+		QuantumFaltante--;
+		if(QuantumFaltante == 0)
+		{
+			//Inicia la comnutación
+		}
+			//Sacar datos de la pila (registros, y de mas cosas importantes)
+			//Almacenar esos datos en el PCB actual
+			//Obtener datos globales i almacenar en el PCB actual (contador)
+			//Obtener el PCB que le toca acceder al procesador
+			//Tomar los datos del PCB que sean necesarios para ingresar en la pila
+			//Ingresar los datos a la pila
+			//Cambiar los datos globales en base al PCB nuevo
+		}
+	
 }
 
 //Captura los datos ingresan al teclado
@@ -464,11 +459,11 @@ void Gramatica()
 		}
 		else 
 		{
-			if (strcmp(accion,"stats") == 0)
+			if(accion == "stats")
 			{
 				//stats ##
 				printf("Estadisticas: ");
-				Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 6;
+				
 				//leo opciones de estadísticas
 				Token = TomaToken(i);
 				if (Token == 2)
@@ -477,9 +472,11 @@ void Gramatica()
 					{
 						printf("Error: La estadistica seleccionada no existe");
 					}
-					//CODIGO SI ESCOGIÓ STATS CON PARÁMETRO 0
-					Ventanas[numVentana].List[Ventanas[numVentana].finLista].x = 0;
-					Ventanas[numVentana].finLista++;
+					else
+					{
+						//CODIGO SI ESCOGIÓ STATS CON PARÁMETRO 0
+						printf("Idle " , "%d" ,Ventanas[0].tiempoUso/TiempoTotal , '%');
+					}
 				}
 				else
 				{
@@ -490,9 +487,19 @@ void Gramatica()
 						{
 							printf("Error: La estadistica seleccionada no existe");
 						}
-						//CODIGO SI ESCOGIÓ STATS CON PARÁMETRO -1
-						Ventanas[numVentana].List[Ventanas[numVentana].finLista].x = -1;
-						Ventanas[numVentana].finLista++;
+						else
+						{
+							int porcentaje = 0;
+							//CODIGO SI ESCOGIÓ STATS CON PARÁMETRO -1;
+							for(int i = 1; i < 7; i++)
+							{
+								if(Ventanas[i].Estado != 4)
+								{
+									porcentaje = Ventanas[i].tiempoUso/TiempoTotal;
+								}
+								printf("%d", i , "%d", porcentaje , "%,");
+							}
+						}	
 					}
 					else
 					{
@@ -513,11 +520,16 @@ void Gramatica()
 					}
 					else
 					{
-						//milisegundos = atoi(lexema);
-						//Ventanas[numVentana].List[Ventanas[numVentana].finLista] = {5, atoi(lexema), 0};
-						Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 5;
-						Ventanas[numVentana].List[Ventanas[numVentana].finLista].x = atoi(lexema);
-						Ventanas[numVentana].finLista++;
+						if(Ventanas[numVentana].finLista < 30)
+						{
+							Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 5;
+							Ventanas[numVentana].List[Ventanas[numVentana].finLista].parametro = atoi(lexema);
+							Ventanas[numVentana].finLista++;
+						}
+						else
+						{
+							printf("Error: Ventana saturada");
+						}
 					}
 				}
 				else
@@ -526,9 +538,54 @@ void Gramatica()
 					if (strcmp(accion,"add") == 0)
 					{
 						printf("Nueva ventana: ");
+						if(Ventanas[numVentana].Estado == 4)
+						{
+							Ventanas[numVentana].Estado = 1;
+							Ventanas[numVentana].quantum = 500;
 
-						Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 1;
-						Ventanas[numVentana].finLista++;
+							if(numVentana<4)
+							{
+								Ventanas[numVentana].inicioX = 2 + (numVentana-1)*26;
+								Ventanas[numVentana].inicioY = 1;
+							}
+							else
+							{
+								Ventanas[numVentana].inicioX = 2 + (numVentana-4)*26;
+								Ventanas[numVentana].inicioY = 11;
+							}	
+
+							Ventanas[numVentana].i = Ventanas[numVentana].inicioX;
+							Ventanas[numVentana].j = Ventanas[numVentana].inicioY;
+
+							Ventanas[numVentana].tiempoUso  = 0;
+							Ventanas[numVentana].banderas = 0;
+							
+							Ventanas[numVentana].finLista = 0;
+							
+							Ventanas[numVentana].IP = (int)&Ventana;
+							int cs_;
+							asm{
+								mov ax, cs 
+								mov cs_, ax
+							}
+
+							Ventanas[numVentana].CS = cs_;
+							Ventanas[numVentana].ax = 0;
+							Ventanas[numVentana].bx = 0;
+							Ventanas[numVentana].cx = 0;
+							Ventanas[numVentana].dx = 0;
+						}
+						else
+						{
+							if(Ventanas[numVentana].Estado == 2)
+							{
+								Ventanas[numVentana].Estado = 1;
+							}
+							else
+							{
+								printf("Error: la ventana ya se encuentra activa");
+							}
+						}
 					}
 					else
 					{
@@ -537,8 +594,16 @@ void Gramatica()
 							printf("Ventana pausada: ");
 							imprimirCaracterNVeces(numVentana, 1);
 
-							Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 2;
-							Ventanas[numVentana].finLista++;
+							if(Ventanas[numVentana].finLista < 30)
+							{
+								Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 2;
+								Ventanas[numVentana].finLista++;
+							}
+							else
+							{
+								printf("Error: Ventana saturada");
+							}
+							
 						}
 						else
 						{
@@ -547,8 +612,15 @@ void Gramatica()
 								printf("Eliminar ventana: ");
 								imprimirCaracterNVeces(numVentana, 1);
 
-								Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 3;
-								Ventanas[numVentana].finLista++;
+								if(Ventanas[numVentana].finLista < 30)
+								{
+									Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 3;
+									Ventanas[numVentana].finLista++;
+								}
+								else
+								{
+									printf("Error: Ventana saturada");
+								}
 							}
 							else
 							{
@@ -556,8 +628,16 @@ void Gramatica()
 								{
 									printf("Vaciar vetana: ");
 									imprimirCaracterNVeces(numVentana, 1);
-									Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 4;
-									Ventanas[numVentana].finLista++;
+
+									if(Ventanas[numVentana].finLista < 30)
+									{
+										Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 4;
+										Ventanas[numVentana].finLista++;
+									}
+									else
+									{
+										printf("Error: Ventana saturada");
+									}
 								}
 								else
 								{
@@ -649,13 +729,66 @@ void Ventana()
 					{
 						printf(" ");
 					}
-					
+					//REGRESAR EL CURSOR A DONDE ESTABA ANTES DE COLOCAR EL PUNTO
 					gotoxy(posX, posY);
 				}
 			}
 		}
+
+		banderaAccion = 1;
+
+		if(Ventanas[PCBActual].inicioLista != Ventanas[PCBActual].finLista)
+		{
+			Acciones(Ventanas[PCBActual].List[Ventanas[PCBActual].inicioLista]);
+			Ventanas[PCBActual].inicioLista++;
+		}
+		else
+		{
+			Ventanas[PCBActual].inicioLista = 0;
+			Ventanas[PCBActual].finLista = 0;
+		}
+
+		banderaAccion = 0;
+		
 		//Basicamente es un while infinito con un for interno
-		//REGRESAR EL CURSOR A DONDE ESTABA ANTES DE COLOCAR EL PUNTO
+		
+	}
+}
+
+void Acciones(ToDo com)
+{
+	switch(com.comando)
+	{
+		case 2:
+		{
+			//pausa
+			Ventanas[PCBActual].Estado = 3;
+
+		}break;
+		case 3:
+		{
+			//remove
+			Ventanas[PCBActual].Estado = 4;
+			
+		}break;
+		case 4:
+		{
+			//clear
+			for(iVentana = inicioX; iVentana < inicioX + 24; iVentana++)
+			{
+				for(jVentana = inicioY; jVentana < inicioY + 8; jVentana++)
+				{
+					posVentana = jVentana*80 + iVentana;
+					CliksVentanas[posVentana] = 0;
+				}
+			}
+
+		}break;
+		case 5:
+		{
+			//quantum
+			Ventanas[PCBActual].quantum = com.parametro*0.182;
+		}break;
 	}
 }
 
