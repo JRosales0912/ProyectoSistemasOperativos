@@ -13,6 +13,7 @@ int array[30];
 void prueba();
 void prueba_();
 int ad;
+int cont = 0;
 
 int main()
 {
@@ -49,21 +50,24 @@ void interrupt tick(...)
 {
     for(int i = 0; i < 30; i++)
     {
-	int x;
-	asm {
-	    pop x;
-	}
-	array[i] = x;
-	printf("%d ", x);
+            cont++;
+        int x;
+        asm {
+            pop x;
+        }
+        array[i] = x;
+        printf("%d ", x);
 
-	delay(250);
+        delay(250);
     }
+    printf("%d ", cont);
 
     for(int j = 29; j >= 0; j--)
     {
-	int y = array[j];
-	asm push y;
+        int y = array[j];
+        asm push y;
     }
 
     printf(" Se acabo ");
+    cont = 0;
 }

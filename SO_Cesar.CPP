@@ -34,7 +34,7 @@ Declaracion de Estructuras
 		int inicioLista;
 		
 		//Lo que creemos
-		int Registros[28];
+		int Registros[29];
 	};
 
 /*------------------------------------------------------
@@ -57,12 +57,12 @@ Declaracion de Variables Globales
 	int numVentana = 0;
 	int i = 0;
 	int Token = 0;
-	char accion[40] = "";
 
 	int iconmutar = 0;
 	int PCBSalida = 0;
 	int valorConmutar = 0;
 	int banderaAccion = 0;
+	int z;
 
 	char instruccion[40]= "";
 	char lexema[40]= "";
@@ -107,12 +107,12 @@ int main()
 	posX = 10;
 	posY = 19;
 	RenderKernel(); //Se ejecuta el proceso del Render Kernel, se pinta la pantalla
-	//CoreKernel(); //Se realiza la incialización de procesos
+	CoreKernel(); //Se realiza la incialización de procesos
 	delay(5);
 	gotoxy(posX, posY);
 	
 	QuantumFaltante = 91;
-	Idle();
+	Ventana();
 	return 0;
 }
 
@@ -241,6 +241,32 @@ void Temporizador()
 
 void interrupt tick(...)
 {
+	if(TiempoTotal == 0)
+	{
+		z=0;
+		for(z = 0; z < 29; z++)
+		{
+			asm{
+				pop valorConmutar
+			}
+			Ventanas[0].Registros[z] = valorConmutar;
+			Ventanas[1].Registros[z] = valorConmutar;
+			Ventanas[2].Registros[z] = valorConmutar;
+			Ventanas[3].Registros[z] = valorConmutar;
+			Ventanas[4].Registros[z] = valorConmutar;
+			Ventanas[5].Registros[z] = valorConmutar;
+			Ventanas[6].Registros[z] = valorConmutar;
+		}
+		z=28;
+		for(z = 28; z >= 0; z--)
+		{
+			valorConmutar = Ventanas[0].Registros[z];
+			asm{
+				push valorConmutar
+			}
+		}
+	}
+
 	TiempoTotal++;
 	(*ptTick)(...); // Executing timer original interrupt
 	EscribirClick();
@@ -253,10 +279,11 @@ void interrupt tick(...)
 		QuantumFaltante--;
 		if(QuantumFaltante == 0)
 		{
+			
 			//aqui
 			//Inicia la comnutación
 			//Sacar datos de la pila (registros, y de mas cosas importantes)
-			for(iconmutar = 0; iconmutar < 28; iconmutar++)
+			for(iconmutar = 0; iconmutar < 29; iconmutar++)
 			{
 				asm{
 					pop valorConmutar;
@@ -296,9 +323,9 @@ void interrupt tick(...)
 			Ventanas[PCBSalida].j = jVentana;
 			iVentana = Ventanas[PCBActual].i;
 			jVentana = Ventanas[PCBActual].j;
-
+			
 			//Ingresar los nuevos datos a la pila
-			for(iconmutar = 27; iconmutar >= 0; iconmutar--)
+			for(iconmutar = 28; iconmutar >= 0; iconmutar--)
 			{
 				valorConmutar = Ventanas[PCBActual].Registros[iconmutar];
 				asm{
@@ -309,8 +336,7 @@ void interrupt tick(...)
 			
 			//Cambiar los datos globales en base al PCB nuevo
 		}
-	}
-	
+	}	
 }
 
 //Captura los datos ingresan al teclado
@@ -451,8 +477,10 @@ void Gramatica()
 	gotoxy(posX,posY);
 	imprimirCaracterNVeces(32, 60);
 	gotoxy(posX,posY);
-
+	i = 0;
+	numVentana = 0;
 	Token = TomaToken(i);
+	char accion[40] = "";
 
 	for(int x = 0; x < contLexema; x++)
 	{
@@ -461,6 +489,7 @@ void Gramatica()
 
 	//Definir la gramatica segun los parametros que estan en el enunciado
 	//Lo primero que debe venir es un identificador
+	printf("%d", Token);
 	if (Token != 1)
 	{
 		printf("Error: Se necesita una instruccion valida");
@@ -717,46 +746,52 @@ void Ventana()
 {
 	while(1)
 	{
-		delay(5);
-		for(iVentana = inicioX; iVentana < inicioX + 24; iVentana++)
+		if(PCBActual == 0)
 		{
-			for(jVentana = inicioY; jVentana < inicioY + 8; jVentana++)
-			{
-				posVentana = jVentana*80 + iVentana;
-				if(!CliksVentanas[posVentana])
-				{
-					gotoxy(iVentana, jVentana);
-					if(pintar)
-					{
-						printf(".");
-					}
-					else
-					{
-						printf(" ");
-					}
-					//REGRESAR EL CURSOR A DONDE ESTABA ANTES DE COLOCAR EL PUNTO
-					gotoxy(posX, posY);
-				}
-			}
-		}
-
-		banderaAccion = 1;
-
-		if(Ventanas[PCBActual].inicioLista != Ventanas[PCBActual].finLista)
-		{
-			Acciones(Ventanas[PCBActual].List[Ventanas[PCBActual].inicioLista]);
-			Ventanas[PCBActual].inicioLista++;
+			delay(5);
 		}
 		else
 		{
-			Ventanas[PCBActual].inicioLista = 0;
-			Ventanas[PCBActual].finLista = 0;
-		}
+			delay(5);
+			for(iVentana = inicioX; iVentana < inicioX + 24; iVentana++)
+			{
+				for(jVentana = inicioY; jVentana < inicioY + 8; jVentana++)
+				{
+					posVentana = jVentana*80 + iVentana;
+					if(!CliksVentanas[posVentana])
+					{
+						gotoxy(iVentana, jVentana);
+						if(pintar)
+						{
+							printf(".");
+						}
+						else
+						{
+							printf(" ");
+						}
+						//REGRESAR EL CURSOR A DONDE ESTABA ANTES DE COLOCAR EL PUNTO
+						gotoxy(posX, posY);
+					}
+				}
+			}
 
-		banderaAccion = 0;
-		
-		//Basicamente es un while infinito con un for interno
-		
+			banderaAccion = 1;
+
+			if(Ventanas[PCBActual].inicioLista != Ventanas[PCBActual].finLista)
+			{
+				Acciones(Ventanas[PCBActual].List[Ventanas[PCBActual].inicioLista]);
+				Ventanas[PCBActual].inicioLista++;
+			}
+			else
+			{
+				Ventanas[PCBActual].inicioLista = 0;
+				Ventanas[PCBActual].finLista = 0;
+			}
+
+			banderaAccion = 0;
+			
+			//Basicamente es un while infinito con un for interno
+		}
 	}
 }
 
