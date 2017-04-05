@@ -9,22 +9,34 @@
 void interrupt tick(...); //New tick function
 void interrupt (*ptTick)(...); //Last tick function
 void Temporizador();
-int array[28];
+int array[30];
+void prueba();
+void prueba_();
+int ad;
 
 int main()
 {
+       ad = (int) &prueba;
     asm{
-        mov ax, 1234
-        push ax
+	mov ax, 1234
+	push ax
+	mov ax, ad
+	push ax
     }
 
     Temporizador();
+    prueba();
 
-    while(1)
-    {
-        delay(1);
-    }
     return 1;
+}
+
+void prueba()
+{
+	    while(1)
+	    {
+		delay(5);
+		printf("x");
+	    }
 }
 
 void Temporizador()
@@ -35,21 +47,22 @@ void Temporizador()
 
 void interrupt tick(...)
 {
-    for(int i = 0; i < 28; i++)
+    for(int i = 0; i < 30; i++)
     {
-        int x;
-        asm {
-            pop x;
-        }
-        array[i] = x;
-        printf("%d ", x);
+	int x;
+	asm {
+	    pop x;
+	}
+	array[i] = x;
+	printf("%d ", x);
 
-        delay(250);
+	delay(250);
     }
 
-    for(int i = 27; i >= 0; i--)
+    for(int j = 29; j >= 0; j--)
     {
-        push array[i];
+	int y = array[j];
+	asm push y;
     }
 
     printf(" Se acabo ");
