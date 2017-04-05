@@ -13,6 +13,7 @@ Declaracion de Estructuras
 		int comando; // { Add = 1, Pause = 2, Remove = 3, Clear = 4, Quantum = 5, Stats = 6};
 		//Coordenadas para blinkear si comando = 7
 		int parametro;// Si comando = 5 guardo milisegundo si comando = 6 guardo tipo de estadísticas
+		//algo aalgo
 	};
 
 	
@@ -70,7 +71,6 @@ Declaracion de Variables Globales
 	int contLexema;
 	int posX;
 	int posY;
-
 
 /*------------------------------------------------------
 Declaracion de prototipos
