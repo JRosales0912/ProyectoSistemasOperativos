@@ -48,7 +48,7 @@ Declaracion de Variables Globales
 	int inicioY;
 	int iVentana;
 	int jVentana;
-	int PCBActual = 1;
+	int PCBActual = 0;
 	int posVentana;
 	int pintar = 1;
 	PCB Ventanas[7];
