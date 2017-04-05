@@ -21,10 +21,10 @@ Declaracion de Estructuras
 		int ID;
 		int Estado;  //{ Corriendo = 1, Listo = 2, Pausa = 3, Removido = 4};
 		int quantum;
-		int inicioX;
-		int inicioY;
 		int i;
 		int j;
+		int inicioX;
+		int inicioY;
 		int tiempoUso; //Si se mata el proceso, este tiempo se reinicia
 		int posVentana;
 		
@@ -32,15 +32,9 @@ Declaracion de Estructuras
 		ToDo List[30];
 		int finLista;
 		int inicioLista;
-
-		//Contexto en el CPU
-		int banderas;
-		int IP;
-		int CS;
-		int ax;
-		int bx;
-		int cx;
-		int dx;
+		
+		//Lo que creemos
+		int Registros[28];
 	};
 
 /*------------------------------------------------------
@@ -65,6 +59,9 @@ Declaracion de Variables Globales
 	int Token = 0;
 	char accion[40] = "";
 
+	int iconmutar = 0;
+	int PCBSalida = 0;
+	int valorConmutar = 0;
 	int banderaAccion = 0;
 
 	char instruccion[40]= "";
@@ -221,23 +218,10 @@ void CoreKernel()
 		Ventanas[i].j = Ventanas[i].inicioY;
 
 		Ventanas[i].tiempoUso  = 0;
-		Ventanas[i].banderas = 0;
 		
 		Ventanas[i].finLista = 0;
 		Ventanas[i].inicioLista = 0;
 		
-		Ventanas[i].IP = (int)&Ventana;
-		int cs_;
-		asm{
-			mov ax, cs 
-			mov cs_, ax
-		}
-
-		Ventanas[i].CS = cs_;
-		Ventanas[i].ax = 0;
-		Ventanas[i].bx = 0;
-		Ventanas[i].cx = 0;
-		Ventanas[i].dx = 0;
 	}
 
 	Ventanas[0].ID = 0;
@@ -245,19 +229,6 @@ void CoreKernel()
 	Ventanas[0].quantum = 500;
 
 	Ventanas[0].tiempoUso  = 0;
-	Ventanas[0].banderas = 0;
-	Ventanas[0].IP = (int)&Idle;
-	int cs_;
-	asm{
-		mov ax, cs 
-		mov cs_, ax
-	}
-
-	Ventanas[0].CS = cs_;
-	Ventanas[0].ax = 0;
-	Ventanas[0].bx = 0;
-	Ventanas[0].cx = 0;
-	Ventanas[0].dx = 0;
 
 	Temporizador(); //Ingresa el residente del temporizador en la interrupcion 1C
 }
@@ -282,16 +253,63 @@ void interrupt tick(...)
 		QuantumFaltante--;
 		if(QuantumFaltante == 0)
 		{
+			//aqui
 			//Inicia la comnutación
-		}
 			//Sacar datos de la pila (registros, y de mas cosas importantes)
-			//Almacenar esos datos en el PCB actual
+			for(iconmutar = 0; iconmutar < 28; iconmutar++)
+			{
+				asm{
+					pop valorConmutar;
+				}
+				Ventanas[PCBActual].Registros[iconmutar] = valorConmutar;
+			}
+
 			//Obtener datos globales i almacenar en el PCB actual (contador)
+
 			//Obtener el PCB que le toca acceder al procesador
-			//Tomar los datos del PCB que sean necesarios para ingresar en la pila
-			//Ingresar los datos a la pila
+			iconmutar = 1;
+			PCBSalida = PCBActual;
+
+			while(Ventanas[iconmutar].Estado != 2)
+			{
+				if(PCBActual == 6)
+				{
+					PCBActual = 1;
+				}
+				else
+				{
+					PCBActual++;
+				}
+
+				if(PCBSalida == PCBSalida)
+				{
+					PCBActual = 0;
+					break;
+				}
+				iconmutar++;
+			}
+
+			Ventanas[PCBSalida].Estado = 2;
+			Ventanas[PCBActual].Estado = 1;
+
+			Ventanas[PCBSalida].i = iVentana;
+			Ventanas[PCBSalida].j = jVentana;
+			iVentana = Ventanas[PCBActual].i;
+			jVentana = Ventanas[PCBActual].j;
+
+			//Ingresar los nuevos datos a la pila
+			for(iconmutar = 27; iconmutar >= 0; iconmutar--)
+			{
+				valorConmutar = Ventanas[PCBActual].Registros[iconmutar];
+				asm{
+					push valorConmutar;
+				}
+				
+			}
+			
 			//Cambiar los datos globales en base al PCB nuevo
 		}
+	}
 	
 }
 
@@ -554,32 +572,19 @@ void Gramatica()
 								Ventanas[numVentana].inicioY = 11;
 							}	
 
-							Ventanas[numVentana].i = Ventanas[numVentana].inicioX;
+							Ventanas[numVentana].i  = Ventanas[numVentana].inicioX;
 							Ventanas[numVentana].j = Ventanas[numVentana].inicioY;
 
 							Ventanas[numVentana].tiempoUso  = 0;
-							Ventanas[numVentana].banderas = 0;
 							
 							Ventanas[numVentana].finLista = 0;
 							
-							Ventanas[numVentana].IP = (int)&Ventana;
-							int cs_;
-							asm{
-								mov ax, cs 
-								mov cs_, ax
-							}
-
-							Ventanas[numVentana].CS = cs_;
-							Ventanas[numVentana].ax = 0;
-							Ventanas[numVentana].bx = 0;
-							Ventanas[numVentana].cx = 0;
-							Ventanas[numVentana].dx = 0;
 						}
 						else
 						{
-							if(Ventanas[numVentana].Estado == 2)
+							if(Ventanas[numVentana].Estado == 3)
 							{
-								Ventanas[numVentana].Estado = 1;
+								Ventanas[numVentana].Estado = 2;
 							}
 							else
 							{
