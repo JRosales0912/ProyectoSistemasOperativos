@@ -533,10 +533,11 @@ void Gramatica()
 						if(Ventanas[numVentana].Estado == 4)
 						{
 							Ventanas[numVentana].Estado = 2;
+							printf("%d activada estado %d", Ventanas[numVentana], Ventanas[numVentana].Estado)
 							Ventanas[numVentana].quantum = 500;
 
 							if(numVentana<4)
-							{
+							{ 
 								Ventanas[numVentana].inicioX = 2 + (numVentana-1)*26;
 								Ventanas[numVentana].inicioY = 1;
 							}
@@ -650,7 +651,7 @@ void EscribirClick()
 		{
 			CliksVentanas[pos] = 1;
 			gotoxy(x,y);
-			printf(".");
+			printf("P");
 		}
 	}
 
@@ -701,6 +702,7 @@ void Ventana()
 		else
 		{
 			delay(5);
+			printf("Ventana()");
 			for(iVentana = inicioX; iVentana < inicioX + 24; iVentana++)
 			{
 				for(jVentana = inicioY; jVentana < inicioY + 8; jVentana++)
