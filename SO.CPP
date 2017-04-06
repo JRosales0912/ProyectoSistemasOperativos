@@ -42,11 +42,11 @@ Declaracion de Variables Globales
 	int TiempoTotal;
 	int QuantumFaltante;
 	int CliksVentanas[1440] = {0};
-	int inicioX;
-	int inicioY;
+	int inicioX = 3;
+	int inicioY = 2;
 	int iVentana;
 	int jVentana;
-	int PCBActual = 0;
+	int PCBActual = 1;
 	int posVentana;
 	int pintar = 1;
 	PCB Ventanas[7];
@@ -108,7 +108,7 @@ int main()
 	delay(5);
 	gotoxy(posX, posY);
 	
-	QuantumFaltante = 91;
+	QuantumFaltante = 364;
 	Ventana();
 	return 0;
 }
@@ -198,7 +198,7 @@ void CoreKernel()
 	{
 		Ventanas[i].ID = i;
 		Ventanas[i].Estado = 4;
-		Ventanas[i].quantum = 500;
+		Ventanas[i].quantum = 2000;
 
 		if(i<4)
 		{
@@ -244,7 +244,7 @@ void interrupt tick(...)
 	LeerTeclado();
 	
 	//Reviso para no iterrumpir una acción
-	if(!banderaAccion)
+	if(banderaAccion == 1)
 	{
 		Ventanas[PCBActual].tiempoUso++;
 		QuantumFaltante--;
@@ -252,10 +252,9 @@ void interrupt tick(...)
 		{
 			//Inicia la comnutación
 			//Obtener el PCB que le toca acceder al procesador
-			iconmutar = 1;
 			PCBSalida = PCBActual;
 
-			while(Ventanas[iconmutar].Estado != 2)
+			while(Ventanas[PCBActual].Estado != 2)
 			{
 				if(PCBActual == 6)
 				{
@@ -266,12 +265,11 @@ void interrupt tick(...)
 					PCBActual++;
 				}
 
-				if(PCBSalida == PCBSalida)
+				if(PCBSalida == PCBActual)
 				{
 					PCBActual = 0;
 					break;
 				}
-				iconmutar++;
 			}
 
 			Ventanas[PCBSalida].Estado = 2;
@@ -533,7 +531,7 @@ void Gramatica()
 						if(Ventanas[numVentana].Estado == 4)
 						{
 							Ventanas[numVentana].Estado = 2;
-							printf("%d activada estado %d", Ventanas[numVentana], Ventanas[numVentana].Estado)
+							printf("%d activada estado %d", Ventanas[numVentana], Ventanas[numVentana].Estado);
 							Ventanas[numVentana].quantum = 500;
 
 							if(numVentana<4)
@@ -650,8 +648,7 @@ void EscribirClick()
 		if(pos < 1440)
 		{
 			CliksVentanas[pos] = 1;
-			gotoxy(x,y);
-			printf("P");
+			gotoxy(posX,posY);
 		}
 	}
 
@@ -695,24 +692,29 @@ void Ventana()
 {
 	while(1)
 	{
+		delay(5);
 		if(PCBActual == 0)
 		{
 			delay(5);
 		}
 		else
 		{
-			delay(5);
-			printf("Ventana()");
 			for(iVentana = inicioX; iVentana < inicioX + 24; iVentana++)
 			{
-				for(jVentana = inicioY; jVentana < inicioY + 8; jVentana++)
+				for(jVentana = inicioY; jVentana < inicioY + 7; jVentana++)
 				{
 					posVentana = jVentana*80 + iVentana;
-					if(!CliksVentanas[posVentana])
+					if(CliksVentanas[posVentana] == 1)
 					{
 						gotoxy(iVentana, jVentana);
-						printf("x");
-						printf(".");
+						if(pintar == 1)
+						{
+							printf(".");
+						}
+						else
+						{
+							printf(" ");
+						}
 						//REGRESAR EL CURSOR A DONDE ESTABA ANTES DE COLOCAR EL PUNTO
 						gotoxy(posX, posY);
 					}
@@ -720,6 +722,15 @@ void Ventana()
 			}
 
 			banderaAccion = 1;
+
+			if(pintar == 1)
+			{
+				pintar = 0;
+			}
+			else
+			{
+				pintar = 1;
+			}
 
 			if(Ventanas[PCBActual].inicioLista != Ventanas[PCBActual].finLista)
 			{
@@ -777,43 +788,3 @@ void Acciones(ToDo com)
 		}break;
 	}
 }
-
-void Idle()
-{
-	int x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13;
-	asm{
-		pop x1
-		pop x2
-		pop x3
-		pop x4 
-		pop x5
-		pop x6
-		pop x7
-		pop x8
-		pop x9
-		pop x10
-		pop x11
-		pop x12
-		pop x13
-	}
-	printf("call ");
-	printf("%d ", x1);
-	printf("%d ", x2);
-	printf("%d ", x3);
-	printf("%d ", x4);
-	printf("%d ", x5);
-	printf("%d ", x6);
-	printf("%d ", x7);
-	printf("%d ", x8);
-	printf("%d ", x9);
-	printf("%d ", x10);
-	printf("%d ", x11);
-	printf("%d ", x12);
-	printf("%d ", x13);
-
-	while(1)
-	{
-		delay(5);
-	}
-}             
-
