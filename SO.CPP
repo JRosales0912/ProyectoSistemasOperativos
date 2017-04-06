@@ -33,9 +33,6 @@ Declaracion de Estructuras
 		ToDo List[30];
 		int finLista;
 		int inicioLista;
-		
-		//Lo que creemos
-		int Registros[29];
 	};
 
 /*------------------------------------------------------
@@ -241,32 +238,6 @@ void Temporizador()
 
 void interrupt tick(...)
 {
-	if(TiempoTotal == 0)
-	{
-		z=0;
-		for(z = 0; z < 29; z++)
-		{
-			asm{
-				pop valorConmutar
-			}
-			Ventanas[0].Registros[z] = valorConmutar;
-			Ventanas[1].Registros[z] = valorConmutar;
-			Ventanas[2].Registros[z] = valorConmutar;
-			Ventanas[3].Registros[z] = valorConmutar;
-			Ventanas[4].Registros[z] = valorConmutar;
-			Ventanas[5].Registros[z] = valorConmutar;
-			Ventanas[6].Registros[z] = valorConmutar;
-		}
-		z=28;
-		for(z = 28; z >= 0; z--)
-		{
-			valorConmutar = Ventanas[0].Registros[z];
-			asm{
-				push valorConmutar
-			}
-		}
-	}
-
 	TiempoTotal++;
 	(*ptTick)(...); // Executing timer original interrupt
 	EscribirClick();
@@ -279,20 +250,7 @@ void interrupt tick(...)
 		QuantumFaltante--;
 		if(QuantumFaltante == 0)
 		{
-			
-			//aqui
 			//Inicia la comnutación
-			//Sacar datos de la pila (registros, y de mas cosas importantes)
-			for(iconmutar = 0; iconmutar < 29; iconmutar++)
-			{
-				asm{
-					pop valorConmutar;
-				}
-				Ventanas[PCBActual].Registros[iconmutar] = valorConmutar;
-			}
-
-			//Obtener datos globales i almacenar en el PCB actual (contador)
-
 			//Obtener el PCB que le toca acceder al procesador
 			iconmutar = 1;
 			PCBSalida = PCBActual;
@@ -323,18 +281,6 @@ void interrupt tick(...)
 			Ventanas[PCBSalida].j = jVentana;
 			iVentana = Ventanas[PCBActual].i;
 			jVentana = Ventanas[PCBActual].j;
-			
-			//Ingresar los nuevos datos a la pila
-			for(iconmutar = 28; iconmutar >= 0; iconmutar--)
-			{
-				valorConmutar = Ventanas[PCBActual].Registros[iconmutar];
-				asm{
-					push valorConmutar;
-				}
-				
-			}
-			
-			//Cambiar los datos globales en base al PCB nuevo
 		}
 	}	
 }
@@ -489,7 +435,6 @@ void Gramatica()
 
 	//Definir la gramatica segun los parametros que estan en el enunciado
 	//Lo primero que debe venir es un identificador
-	printf("%d", Token);
 	if (Token != 1)
 	{
 		printf("Error: Se necesita una instruccion valida");
@@ -587,7 +532,7 @@ void Gramatica()
 						printf("Nueva ventana: ");
 						if(Ventanas[numVentana].Estado == 4)
 						{
-							Ventanas[numVentana].Estado = 1;
+							Ventanas[numVentana].Estado = 2;
 							Ventanas[numVentana].quantum = 500;
 
 							if(numVentana<4)
@@ -618,6 +563,7 @@ void Gramatica()
 							else
 							{
 								printf("Error: la ventana ya se encuentra activa");
+								printf("%d",numVentana);
 							}
 						}
 					}
@@ -703,6 +649,8 @@ void EscribirClick()
 		if(pos < 1440)
 		{
 			CliksVentanas[pos] = 1;
+			gotoxy(x,y);
+			printf(".");
 		}
 	}
 
@@ -761,14 +709,8 @@ void Ventana()
 					if(!CliksVentanas[posVentana])
 					{
 						gotoxy(iVentana, jVentana);
-						if(pintar)
-						{
-							printf(".");
-						}
-						else
-						{
-							printf(" ");
-						}
+						printf("x");
+						printf(".");
 						//REGRESAR EL CURSOR A DONDE ESTABA ANTES DE COLOCAR EL PUNTO
 						gotoxy(posX, posY);
 					}
@@ -802,7 +744,9 @@ void Acciones(ToDo com)
 		case 2:
 		{
 			//pausa
+			printf("%d", Ventanas[PCBActual].Estado);
 			Ventanas[PCBActual].Estado = 3;
+			printf("%d", Ventanas[PCBActual].Estado);
 
 		}break;
 		case 3:
