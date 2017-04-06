@@ -41,12 +41,12 @@ Declaracion de Variables Globales
 	//Cada ventan es de 80x18
 	int TiempoTotal;
 	int QuantumFaltante;
-	int CliksVentanas[1440] = {0};
-	int inicioX = 3;
-	int inicioY = 2;
+	int CliksVentanas[1600] = {0};
+	int inicioX;
+	int inicioY;
 	int iVentana;
 	int jVentana;
-	int PCBActual = 1;
+	int PCBActual = 0;
 	int posVentana;
 	int pintar = 1;
 	PCB Ventanas[7];
@@ -56,7 +56,6 @@ Declaracion de Variables Globales
 	int i = 0;
 	int Token = 0;
 
-	int iconmutar = 0;
 	int PCBSalida = 0;
 	int valorConmutar = 0;
 	int banderaAccion = 0;
@@ -107,8 +106,8 @@ int main()
 	CoreKernel(); //Se realiza la incialización de procesos
 	delay(5);
 	gotoxy(posX, posY);
-	
-	QuantumFaltante = 364;
+
+	QuantumFaltante = 50;
 	Ventana();
 	return 0;
 }
@@ -198,32 +197,32 @@ void CoreKernel()
 	{
 		Ventanas[i].ID = i;
 		Ventanas[i].Estado = 4;
-		Ventanas[i].quantum = 2000;
+		Ventanas[i].quantum = 20;
 
 		if(i<4)
 		{
-			Ventanas[i].inicioX = 2 + (i-1)*26;
-			Ventanas[i].inicioY = 1;
+			Ventanas[i].inicioX = 3 + (i-1)*26;
+			Ventanas[i].inicioY = 2;
 		}
 		else
 		{
-			Ventanas[i].inicioX = 2 + (i-4)*26;
+			Ventanas[i].inicioX = 3 + (i-4)*26;
 			Ventanas[i].inicioY = 11;
-		}	
+		}
 
 		Ventanas[i].i = Ventanas[i].inicioX;
 		Ventanas[i].j = Ventanas[i].inicioY;
 
 		Ventanas[i].tiempoUso  = 0;
-		
+
 		Ventanas[i].finLista = 0;
 		Ventanas[i].inicioLista = 0;
-		
+
 	}
 
 	Ventanas[0].ID = 0;
 	Ventanas[0].Estado = 1;
-	Ventanas[0].quantum = 500;
+	Ventanas[0].quantum = 20;
 
 	Ventanas[0].tiempoUso  = 0;
 
@@ -238,16 +237,17 @@ void Temporizador()
 
 void interrupt tick(...)
 {
-	TiempoTotal++;
+	TiempoTotal = TiempoTotal + 1;
 	(*ptTick)(...); // Executing timer original interrupt
 	EscribirClick();
 	LeerTeclado();
-	
+
 	//Reviso para no iterrumpir una acción
-	if(banderaAccion == 1)
+	if(banderaAccion == 0)
 	{
-		Ventanas[PCBActual].tiempoUso++;
-		QuantumFaltante--;
+		Ventanas[PCBActual].tiempoUso = Ventanas[PCBActual].tiempoUso - 1;
+		QuantumFaltante = QuantumFaltante - 1;
+		delay(5);
 		if(QuantumFaltante == 0)
 		{
 			//Inicia la comnutación
@@ -256,9 +256,17 @@ void interrupt tick(...)
 
 			while(Ventanas[PCBActual].Estado != 2)
 			{
+				delay(5);
 				if(PCBActual == 6)
 				{
-					PCBActual = 1;
+					if(PCBSalida == 0)
+					{
+						PCBActual = 0;
+					}
+					else
+					{
+						PCBActual = 1;
+					}
 				}
 				else
 				{
@@ -267,11 +275,12 @@ void interrupt tick(...)
 
 				if(PCBSalida == PCBActual)
 				{
-					PCBActual = 0;
-					break;
+					goto salir;
 				}
 			}
+			salir:
 
+			QuantumFaltante = Ventanas[PCBActual].quantum;
 			Ventanas[PCBSalida].Estado = 2;
 			Ventanas[PCBActual].Estado = 1;
 
@@ -279,14 +288,24 @@ void interrupt tick(...)
 			Ventanas[PCBSalida].j = jVentana;
 			iVentana = Ventanas[PCBActual].i;
 			jVentana = Ventanas[PCBActual].j;
+			
+			int _posX = 10;
+			int _posY = 22;
+			gotoxy(_posX, _posY);
+			imprimirCaracterNVeces(32, 60);
+			gotoxy(_posX, _posY);
+			printf("conmutación: entra: %d", PCBActual);
+			printf(" x: %d", iVentana);
+			printf(" y: %d", jVentana);
+			gotoxy(posX,posY);
 		}
-	}	
+	}
 }
 
 //Captura los datos ingresan al teclado
 void LeerTeclado()
 {
-	if(kbhit()) 
+	if(kbhit())
 	{
 		int x = getch();
 		if (x == 13) //Enter
@@ -335,7 +354,7 @@ void LeerTeclado()
 
 void LimpiarInstruccion()
 {
-	for (int i = 0; i < 40; ++i)
+	for (int i = 0; i < 40; i++)
 	{
 		instruccion[i] = 0;
 	}
@@ -532,16 +551,16 @@ void Gramatica()
 						{
 							Ventanas[numVentana].Estado = 2;
 							printf("%d activada estado %d", Ventanas[numVentana], Ventanas[numVentana].Estado);
-							Ventanas[numVentana].quantum = 500;
+							Ventanas[numVentana].quantum = 50;
 
 							if(numVentana<4)
 							{ 
-								Ventanas[numVentana].inicioX = 2 + (numVentana-1)*26;
-								Ventanas[numVentana].inicioY = 1;
+								Ventanas[numVentana].inicioX = 3 + (numVentana-1)*26;
+								Ventanas[numVentana].inicioY = 2;
 							}
 							else
 							{
-								Ventanas[numVentana].inicioX = 2 + (numVentana-4)*26;
+								Ventanas[numVentana].inicioX = 3 + (numVentana-4)*26;
 								Ventanas[numVentana].inicioY = 11;
 							}	
 
@@ -692,7 +711,7 @@ void Ventana()
 {
 	while(1)
 	{
-		delay(5);
+		delay(20);
 		if(PCBActual == 0)
 		{
 			delay(5);
@@ -703,6 +722,7 @@ void Ventana()
 			{
 				for(jVentana = inicioY; jVentana < inicioY + 7; jVentana++)
 				{
+					banderaAccion = 1;
 					posVentana = jVentana*80 + iVentana;
 					if(CliksVentanas[posVentana] == 1)
 					{
@@ -718,6 +738,7 @@ void Ventana()
 						//REGRESAR EL CURSOR A DONDE ESTABA ANTES DE COLOCAR EL PUNTO
 						gotoxy(posX, posY);
 					}
+					banderaAccion = 0;
 				}
 			}
 
