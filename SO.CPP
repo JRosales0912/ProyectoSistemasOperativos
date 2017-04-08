@@ -281,7 +281,11 @@ void interrupt tick(...)
 			salir:
 
 			QuantumFaltante = Ventanas[PCBActual].quantum;
-			Ventanas[PCBSalida].Estado = 2;
+			
+			if(Ventanas[PCBSalida].Estado == 1)
+			{
+				Ventanas[PCBSalida].Estado = 2;
+			}
 			Ventanas[PCBActual].Estado = 1;
 
 			Ventanas[PCBSalida].i = iVentana;
@@ -589,9 +593,6 @@ void Gramatica()
 					{
 						if (strcmp(accion,"pause") == 0)
 						{
-							printf("Ventana pausada: ");
-							imprimirCaracterNVeces(numVentana, 1);
-
 							if(Ventanas[numVentana].finLista < 30)
 							{
 								Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 2;
@@ -639,7 +640,17 @@ void Gramatica()
 								}
 								else
 								{
-									printf("Error: Se necesita una instruccion valida");
+									if(strcmp(accion,"ver") == 0)
+									{
+										printf("Ventana ");
+										printf("%d", numVentana);
+										printf("Estado ");
+										printf("%d", Ventanas[numVentana].Estado );
+									}
+									else
+									{
+										printf("Error: Se necesita una instruccion valida");
+									}
 								}
 							}
 						}
@@ -778,15 +789,21 @@ void Acciones(ToDo com)
 		case 2:
 		{
 			//pausa
-			printf("%d", Ventanas[PCBActual].Estado);
 			Ventanas[PCBActual].Estado = 3;
-			printf("%d", Ventanas[PCBActual].Estado);
 
+			printf("Ventana: ");
+			printf("%d", PCBActual);
+			printf("Pausada");
+			printf("%d", Ventanas[PCBActual].Estado);
 		}break;
 		case 3:
 		{
 			//remove
 			Ventanas[PCBActual].Estado = 4;
+
+			printf("Ventana: ");
+			printf("%d", PCBActual);
+			printf("Removida");
 			
 		}break;
 		case 4:
@@ -801,11 +818,19 @@ void Acciones(ToDo com)
 				}
 			}
 
+			printf("Ventana: ");
+			printf("%d", PCBActual);
+			printf("Limpia");
+
 		}break;
 		case 5:
 		{
 			//quantum
 			Ventanas[PCBActual].quantum = com.parametro*0.182;
+			
+			printf("Quantum de Ventana: ");
+			printf("%d", PCBActual);
+			printf("%d", Ventanas[PCBActual].quantum );
 		}break;
 	}
 }
