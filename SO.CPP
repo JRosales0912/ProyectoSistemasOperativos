@@ -201,12 +201,12 @@ void CoreKernel()
 
 		if(i<4)
 		{
-			Ventanas[i].inicioX = 3 + (i-1)*26;
-			Ventanas[i].inicioY = 2;
+			Ventanas[i].inicioX = 0 + (i-1)*26;
+			Ventanas[i].inicioY = 1;
 		}
 		else
 		{
-			Ventanas[i].inicioX = 3 + (i-4)*26;
+			Ventanas[i].inicioX = 0 + (i-4)*26;
 			Ventanas[i].inicioY = 11;
 		}
 
@@ -741,6 +741,12 @@ void Ventana()
 						}
 						//REGRESAR EL CURSOR A DONDE ESTABA ANTES DE COLOCAR EL PUNTO
 						gotoxy(posX, posY);
+						printf(" x: %d", iVentana);
+						printf(" y: %d", jVentana);
+					}
+					else
+					{
+						printf(" ");
 					}
 					banderaAccion = 0;
 				}
