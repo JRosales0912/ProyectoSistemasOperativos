@@ -474,13 +474,9 @@ void Gramatica()
 		}
 		else 
 		{
-			if(accion == "stats")
+			if(strcmp(accion,"stats") == 0)
 			{
-				//stats ##
-				printf("Estadisticas: ");
-				
-				//leo opciones de estadísticas
-				Token = TomaToken(i);
+				//stats ##				
 				if (Token == 2)
 				{
 					if (numVentana == 0)
@@ -492,7 +488,7 @@ void Gramatica()
 					{
 						if ( numVentana < 1 || numVentana > 6)
 						{
-							printf("Error: La estadistica seleccionada no existe");
+							printf("ErrorStats: La ventana seleccionada no existe ");
 						}
 						else
 						{
@@ -508,7 +504,7 @@ void Gramatica()
 						Token = TomaToken(i);
 						if (Token != 2 && strcmp(lexema, "1") != 0)
 						{
-							printf("Error: La estadistica seleccionada no existe");
+							printf("ErrorStats: La opción de estadistica seleccionada no existe");
 						}
 						else
 						{
@@ -526,7 +522,7 @@ void Gramatica()
 					}
 					else
 					{
-						printf("Error: La estadistica seleccionada no existe");
+						printf("Error: valor para estadistica no valido");
 					}
 				}
 			}
@@ -641,7 +637,7 @@ void Gramatica()
 									}
 									else
 									{
-										printf("Error: Se necesita una instruccion valida");
+										printf("Error: Se necesita una instruccion valida   ");
 										printf(accion);
 									}
 								}
