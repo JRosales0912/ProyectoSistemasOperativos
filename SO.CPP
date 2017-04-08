@@ -554,7 +554,6 @@ void Gramatica()
 						if(Ventanas[numVentana].Estado == 4)
 						{
 							Ventanas[numVentana].Estado = 2;
-							printf("%d activada estado %d", Ventanas[numVentana], Ventanas[numVentana].Estado);
 							Ventanas[numVentana].quantum = 50;
 
 							if(numVentana<4)
@@ -608,9 +607,6 @@ void Gramatica()
 						{
 							if (strcmp(accion,"remove") == 0)
 							{
-								printf("Eliminar ventana: ");
-								imprimirCaracterNVeces(numVentana, 1);
-
 								if(Ventanas[numVentana].finLista < 30)
 								{
 									Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 3;
@@ -625,9 +621,6 @@ void Gramatica()
 							{
 								if (strcmp(accion,"clear") == 0)
 								{
-									printf("Vaciar vetana: ");
-									imprimirCaracterNVeces(numVentana, 1);
-
 									if(Ventanas[numVentana].finLista < 30)
 									{
 										Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 4;
