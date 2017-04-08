@@ -197,8 +197,8 @@ void CoreKernel()
 	{
 		Ventanas[i].ID = i;
 		Ventanas[i].Estado = 4;
-		Ventanas[i].quantum = 20;
-
+		Ventanas[i].quantum = 20;  
+ 
 		if(i<4)
 		{
 			Ventanas[i].inicioX = 3 + (i-1)*26;
@@ -217,7 +217,7 @@ void CoreKernel()
 
 		Ventanas[i].finLista = 0;
 		Ventanas[i].inicioLista = 0;
-
+		//Coment
 	}
 
 	Ventanas[0].ID = 0;
