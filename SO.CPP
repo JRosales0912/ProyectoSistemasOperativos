@@ -568,10 +568,11 @@ void Gramatica()
 							Ventanas[numVentana].tiempoUso  = 0;
 							
 							Ventanas[numVentana].finLista = 0;
-							
+							printf("Ventana nueva: %d", numVentana);
 						}
 						else
 						{
+							printf("Ventana activada: %d", numVentana);
 							if(Ventanas[numVentana].Estado == 3)
 							{
 								Ventanas[numVentana].Estado = 2;
