@@ -201,13 +201,13 @@ void CoreKernel()
 
 		if(i<4)
 		{
-			Ventanas[i].inicioX = 0 + (i-1)*26;
-			Ventanas[i].inicioY = 1;
+			Ventanas[i].inicioX = 3 + (i-1)*26;
+			Ventanas[i].inicioY = 2;
 		}
 		else
 		{
-			Ventanas[i].inicioX = 0 + (i-4)*26;
-			Ventanas[i].inicioY = 11;
+			Ventanas[i].inicioX = 3 + (i-4)*26;
+			Ventanas[i].inicioY = 10;
 		}
 
 		Ventanas[i].i = Ventanas[i].inicioX;
@@ -290,6 +290,8 @@ void interrupt tick(...)
 
 			Ventanas[PCBSalida].i = iVentana;
 			Ventanas[PCBSalida].j = jVentana;
+			inicioX = Ventanas[PCBActual].inicioX;
+			inicioY = Ventanas[PCBActual].inicioY;
 			iVentana = Ventanas[PCBActual].i;
 			jVentana = Ventanas[PCBActual].j;
 			
@@ -556,17 +558,6 @@ void Gramatica()
 							Ventanas[numVentana].Estado = 2;
 							Ventanas[numVentana].quantum = 50;
 
-							if(numVentana<4)
-							{ 
-								Ventanas[numVentana].inicioX = 3 + (numVentana-1)*26;
-								Ventanas[numVentana].inicioY = 2;
-							}
-							else
-							{
-								Ventanas[numVentana].inicioX = 3 + (numVentana-4)*26;
-								Ventanas[numVentana].inicioY = 11;
-							}	
-
 							Ventanas[numVentana].i  = Ventanas[numVentana].inicioX;
 							Ventanas[numVentana].j = Ventanas[numVentana].inicioY;
 
@@ -729,8 +720,8 @@ void Ventana()
 					banderaAccion = 1;
 					posVentana = jVentana*80 + iVentana;
 					if(CliksVentanas[posVentana] == 1)
-					{
-						gotoxy(iVentana, jVentana);
+					{					
+						gotoxy(iVentana, jVentana);	
 						if(pintar == 1)
 						{
 							printf(".");
@@ -739,14 +730,8 @@ void Ventana()
 						{
 							printf(" ");
 						}
-						//REGRESAR EL CURSOR A DONDE ESTABA ANTES DE COLOCAR EL PUNTO
 						gotoxy(posX, posY);
-						printf(" x: %d", iVentana);
-						printf(" y: %d", jVentana);
-					}
-					else
-					{
-						printf(" ");
+						//REGRESAR EL CURSOR A DONDE ESTABA ANTES DE COLOCAR EL PUNTO
 					}
 					banderaAccion = 0;
 				}
