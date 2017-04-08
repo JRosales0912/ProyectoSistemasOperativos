@@ -296,11 +296,11 @@ void interrupt tick(...)
 			jVentana = Ventanas[PCBActual].j;
 			
 			int _posX = 10;
-			int _posY = 22;
+			int _posY = 23;
 			gotoxy(_posX, _posY);
 			imprimirCaracterNVeces(32, 60);
 			gotoxy(_posX, _posY);
-			printf("conmutación: entra: %d", PCBActual);
+			printf("conmutacion: entra: %d", PCBActual);
 			printf(" x: %d", iVentana);
 			printf(" y: %d", jVentana);
 			gotoxy(posX,posY);
@@ -441,6 +441,7 @@ int TomaToken(int& i )
 
 void Gramatica()
 {
+	
 	posX = 10;
 	posY = 22;
 	gotoxy(posX,posY);
@@ -475,10 +476,7 @@ void Gramatica()
 		else 
 		{
 			if(accion == "stats")
-			{
-				//stats ##
-				printf("Estadisticas: ");
-				
+			{				
 				//leo opciones de estadísticas
 				Token = TomaToken(i);
 				if (Token == 2)
@@ -534,7 +532,6 @@ void Gramatica()
 			{
 				if (strcmp(accion,"quantum") == 0)
 				{
-					printf("Nuevo Quantum: ");
 					//leo milisegundos
 					Token = TomaToken(i);
 					if (Token != 2)
@@ -560,7 +557,6 @@ void Gramatica()
 					//todos los demas que no sean estos dos que traen parámetros
 					if (strcmp(accion,"add") == 0)
 					{
-						printf("Nueva ventana: ");
 						if(Ventanas[numVentana].Estado == 4)
 						{
 							Ventanas[numVentana].Estado = 2;
@@ -782,21 +778,26 @@ void Acciones(ToDo com)
 		{
 			//pausa
 			Ventanas[PCBActual].Estado = 3;
-
+			int _posX = 10;
+			int _posY = 22;
+			gotoxy(_posX, _posY);
 			printf("Ventana: ");
 			printf("%d", PCBActual);
 			printf("Pausada");
 			printf("%d", Ventanas[PCBActual].Estado);
+			gotoxy(posX, posY);
 		}break;
 		case 3:
 		{
 			//remove
 			Ventanas[PCBActual].Estado = 4;
-
+			int _posX = 10;
+			int _posY = 22;
+			gotoxy(_posX, _posY);
 			printf("Ventana: ");
 			printf("%d", PCBActual);
 			printf("Removida");
-			
+			gotoxy(posX, posY);			
 		}break;
 		case 4:
 		{
@@ -805,24 +806,31 @@ void Acciones(ToDo com)
 			{
 				for(jVentana = inicioY; jVentana < inicioY + 8; jVentana++)
 				{
+					gotoxy(iVentana, jVentana);
 					posVentana = jVentana*80 + iVentana;
 					CliksVentanas[posVentana] = 0;
+					gotoxy(posX, posY);
 				}
 			}
-
+			int _posX = 10;
+			int _posY = 22;
+			gotoxy(_posX, _posY);
 			printf("Ventana: ");
 			printf("%d", PCBActual);
 			printf("Limpia");
-
+			gotoxy(posX, posY);
 		}break;
 		case 5:
 		{
 			//quantum
 			Ventanas[PCBActual].quantum = com.parametro*0.182;
-			
+			int _posX = 10;
+			int _posY = 22;
+			gotoxy(_posX, _posY);
 			printf("Quantum de Ventana: ");
 			printf("%d", PCBActual);
 			printf("%d", Ventanas[PCBActual].quantum );
+			gotoxy(posX, posY);
 		}break;
 	}
 }
