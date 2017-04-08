@@ -740,13 +740,6 @@ void Ventana()
 							printf(" ");
 						}
 						gotoxy(posX, posY);
-						printf(" x: %d", iVentana);
-						printf(" y: %d", jVentana);
-					}
-					else
-					{
-						//printf(" ");
-						//REGRESAR EL CURSOR A DONDE ESTABA ANTES DE COLOCAR EL PUNTO
 					}
 					banderaAccion = 0;
 				}
