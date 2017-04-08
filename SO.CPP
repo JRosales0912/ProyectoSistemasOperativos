@@ -466,7 +466,7 @@ void Gramatica()
 		numVentana = atoi(lexema);
 
 		//Verifico el numero de ventana
-		if (Token != 2 || numVentana < 1 || numVentana > 6)
+		if ((Token != 2 || numVentana < 1 || numVentana > 6) && (accion != "stats"))
 		{
 			printf("Error: El numero de ventana ingresado no es valido");
 		}
@@ -481,15 +481,23 @@ void Gramatica()
 				Token = TomaToken(i);
 				if (Token == 2)
 				{
-					if (strcmp(lexema, "0") != 0)
-					{
-						printf("Error: La estadistica seleccionada no existe");
-					}
-					else
+					if (numVentana == 0)
 					{
 						//CODIGO SI ESCOGIÓ STATS CON PARÁMETRO 0
 						printf("Idle " , "%d" ,Ventanas[0].tiempoUso/TiempoTotal , '%');
 					}
+					else
+					{
+						if ( numVentana < 1 || numVentana > 6)
+						{
+							printf("Error: La estadistica seleccionada no existe");
+						}
+						else
+						{
+							printf("Stats Ventana:  " , "%d" ,Ventanas[numVentana].tiempoUso/TiempoTotal , '%');
+						}
+					}
+					
 				}
 				else
 				{
@@ -643,6 +651,7 @@ void Gramatica()
 									else
 									{
 										printf("Error: Se necesita una instruccion valida");
+										printf(accion);
 									}
 								}
 							}
@@ -746,7 +755,7 @@ void Ventana()
 					}
 					else
 					{
-						printf(" ");
+						//printf(" ");
 					}
 					banderaAccion = 0;
 				}
