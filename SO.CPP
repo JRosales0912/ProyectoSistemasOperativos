@@ -237,6 +237,7 @@ void Temporizador()
 
 void interrupt tick(...)
 {
+	Ventanas[PCBActual].tiempoUso = Ventanas[PCBActual].tiempoUso + 1;
 	TiempoTotal = TiempoTotal + 1;
 	(*ptTick)(...); // Executing timer original interrupt
 	EscribirClick();
@@ -245,7 +246,6 @@ void interrupt tick(...)
 	//Reviso para no iterrumpir una acción
 	if(banderaAccion == 0)
 	{
-		Ventanas[PCBActual].tiempoUso = Ventanas[PCBActual].tiempoUso - 1;
 		QuantumFaltante = QuantumFaltante - 1;
 		delay(5);
 		if(QuantumFaltante == 0)
@@ -441,7 +441,6 @@ int TomaToken(int& i )
 
 void Gramatica()
 {
-	
 	posX = 10;
 	posY = 22;
 	gotoxy(posX,posY);
@@ -469,21 +468,25 @@ void Gramatica()
 		numVentana = atoi(lexema);
 
 		//Verifico el numero de ventana
-		if ((Token != 2 || numVentana < 1 || numVentana > 6) && (accion != "stats"))
+		if ((Token != 2 || numVentana < 1 || numVentana > 6) && (strcmp(accion,"stats") != 0))
 		{
 			printf("Error: El numero de ventana ingresado no es valido");
 		}
 		else 
 		{
 			if(strcmp(accion,"stats") == 0)
-			{		
+			{	
+				float porcentaje = 0;	
 				//leo opciones de estadísticas
 				if (Token == 2)
 				{
 					if (numVentana == 0)
 					{
+						porcentaje = (Ventanas[0].tiempoUso/TiempoTotal)*100;
 						//CODIGO SI ESCOGIÓ STATS CON PARÁMETRO 0
-						printf("Idle " , "%d" ,Ventanas[0].tiempoUso/TiempoTotal , '%');
+						printf("Stats Idle: ");
+						printf("%3.2f", porcentaje);
+						printf("%");
 					}
 					else
 					{
@@ -493,7 +496,10 @@ void Gramatica()
 						}
 						else
 						{
-							printf("Stats Ventana:  " , "%d" ,Ventanas[numVentana].tiempoUso/TiempoTotal , '%');
+							porcentaje = (Ventanas[numVentana].tiempoUso/TiempoTotal)*100;
+							printf("Stats Ventana:  ");
+							printf("%3.2f",porcentaje);
+							printf("%");
 						}
 					}
 					
@@ -509,15 +515,17 @@ void Gramatica()
 						}
 						else
 						{
-							int porcentaje = 0;
 							//CODIGO SI ESCOGIÓ STATS CON PARÁMETRO -1;
 							for(int i = 1; i < 7; i++)
 							{
 								if(Ventanas[i].Estado != 4)
 								{
-									porcentaje = Ventanas[i].tiempoUso/TiempoTotal;
+									porcentaje = (Ventanas[i].tiempoUso/TiempoTotal)*100;
 								}
-								printf("%d", i , "%d", porcentaje , "%,");
+								printf("%d", i );
+								printf(": ");
+								printf("%3.2f", porcentaje);
+								printf("%, ");
 							}
 						}	
 					}
