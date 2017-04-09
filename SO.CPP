@@ -475,16 +475,9 @@ void Gramatica()
 		}
 		else 
 		{
-<<<<<<< HEAD
 			if(strcmp(accion,"stats") == 0)
-			{
-				//stats ##				
-=======
-			if(accion == "stats")
-			{				
+			{		
 				//leo opciones de estadísticas
-				Token = TomaToken(i);
->>>>>>> f57ab8cf4c3c1784c424fa7cc41970569989f0f7
 				if (Token == 2)
 				{
 					if (numVentana == 0)
