@@ -248,7 +248,7 @@ void interrupt tick(...)
 	{
 		QuantumFaltante = QuantumFaltante - 1;
 		delay(5);
-		if(QuantumFaltante == 0)
+		if(QuantumFaltante < 1)
 		{
 			//Inicia la comnutación
 			//Obtener el PCB que le toca acceder al procesador
@@ -275,6 +275,10 @@ void interrupt tick(...)
 
 				if(PCBSalida == PCBActual)
 				{
+					if(Ventanas[PCBSalida].Estado != 1)  
+					{
+						PCBActual = 0;
+					}
 					goto salir;
 				}
 			}
@@ -573,15 +577,26 @@ void Gramatica()
 							Ventanas[numVentana].j = Ventanas[numVentana].inicioY;
 
 							Ventanas[numVentana].tiempoUso  = 0;
-							
 							Ventanas[numVentana].finLista = 0;
+							
+							int _i;
+							int _j;
+							for(_i = Ventanas[numVentana].inicioX; _i < Ventanas[numVentana].inicioX + 24; _i++)
+							{
+								for(_j = Ventanas[numVentana].inicioY; _j < Ventanas[numVentana].inicioY + 7; _j++)
+								{
+									posVentana = _j*80 + _i;
+									CliksVentanas[posVentana] = 0;
+								}
+							}
+
 							printf("Ventana nueva: %d", numVentana);
 						}
 						else
 						{
-							printf("Ventana activada: %d", numVentana);
 							if(Ventanas[numVentana].Estado == 3)
 							{
+								printf("Ventana activada: %d", numVentana);
 								Ventanas[numVentana].Estado = 2;
 							}
 							else
@@ -786,6 +801,7 @@ void Acciones(ToDo com)
 		{
 			//pausa
 			Ventanas[PCBActual].Estado = 3;
+			Ventanas[PCBActual].quantum = 0;
 			int _posX = 10;
 			int _posY = 22;
 			gotoxy(_posX, _posY);
@@ -799,6 +815,20 @@ void Acciones(ToDo com)
 		{
 			//remove
 			Ventanas[PCBActual].Estado = 4;
+			Ventanas[PCBActual].quantum = 0;
+
+			for(iVentana = inicioX; iVentana < inicioX + 24; iVentana++)
+			{
+				for(jVentana = inicioY; jVentana < inicioY + 7; jVentana++)
+				{
+					gotoxy(iVentana, jVentana);
+					printf(" ");
+					posVentana = jVentana*80 + iVentana;
+					CliksVentanas[posVentana] = 0;
+					gotoxy(posX, posY);
+				}
+			}
+
 			int _posX = 10;
 			int _posY = 22;
 			gotoxy(_posX, _posY);
@@ -812,9 +842,10 @@ void Acciones(ToDo com)
 			//clear
 			for(iVentana = inicioX; iVentana < inicioX + 24; iVentana++)
 			{
-				for(jVentana = inicioY; jVentana < inicioY + 8; jVentana++)
+				for(jVentana = inicioY; jVentana < inicioY + 7; jVentana++)
 				{
 					gotoxy(iVentana, jVentana);
+					printf(" ");
 					posVentana = jVentana*80 + iVentana;
 					CliksVentanas[posVentana] = 0;
 					gotoxy(posX, posY);
