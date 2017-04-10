@@ -39,7 +39,7 @@ Declaracion de Estructuras
 Declaracion de Variables Globales
 -------------------------------------------------------*/
 	//Cada ventan es de 80x18
-	int TiempoTotal;
+	unsigned long int TiempoTotal;
 	int QuantumFaltante;
 	int CliksVentanas[1600] = {0};
 	int inicioX;
@@ -239,6 +239,7 @@ void interrupt tick(...)
 {
 	Ventanas[PCBActual].tiempoUso = Ventanas[PCBActual].tiempoUso + 1;
 	TiempoTotal = TiempoTotal + 1;
+
 	(*ptTick)(...); // Executing timer original interrupt
 	EscribirClick();
 	LeerTeclado();
@@ -486,7 +487,8 @@ void Gramatica()
 				{
 					if (numVentana == 0)
 					{
-						porcentaje = (Ventanas[0].tiempoUso/TiempoTotal)*100;
+						porcentaje = Ventanas[numVentana].tiempoUso;
+						porcentaje = (porcentaje/TiempoTotal)*(100);
 						//CODIGO SI ESCOGIÓ STATS CON PARÁMETRO 0
 						printf("Stats Idle: ");
 						printf("%3.2f", porcentaje);
@@ -500,7 +502,8 @@ void Gramatica()
 						}
 						else
 						{
-							porcentaje = (Ventanas[numVentana].tiempoUso/TiempoTotal)*100;
+							porcentaje = Ventanas[numVentana].tiempoUso;
+							porcentaje = (porcentaje/TiempoTotal)*(100);
 							printf("Stats Ventana:  ");
 							printf("%3.2f",porcentaje);
 							printf("%");
@@ -524,7 +527,12 @@ void Gramatica()
 							{
 								if(Ventanas[i].Estado != 4)
 								{
-									porcentaje = (Ventanas[i].tiempoUso/TiempoTotal)*100;
+									porcentaje = Ventanas[i].tiempoUso;
+									porcentaje = (porcentaje/TiempoTotal)*(100);
+								}
+								else
+								{
+									porcentaje = 0;
 								}
 								printf("%d", i );
 								printf(": ");
