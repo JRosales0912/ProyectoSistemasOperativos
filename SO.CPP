@@ -563,7 +563,7 @@ void Gramatica()
 						{
 							Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 5;
 							Ventanas[numVentana].List[Ventanas[numVentana].finLista].parametro = atoi(lexema);
-							Ventanas[numVentana].finLista++;
+							Ventanas[numVentana].finLista = Ventanas[numVentana].finLista +1;
 						}
 						else
 						{
@@ -585,6 +585,7 @@ void Gramatica()
 							Ventanas[numVentana].j = Ventanas[numVentana].inicioY;
 
 							Ventanas[numVentana].tiempoUso  = 0;
+							Ventanas[numVentana].inicioLista = 0;
 							Ventanas[numVentana].finLista = 0;
 							
 							int _i;
@@ -621,7 +622,7 @@ void Gramatica()
 							if(Ventanas[numVentana].finLista < 30)
 							{
 								Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 2;
-								Ventanas[numVentana].finLista++;
+								Ventanas[numVentana].finLista = Ventanas[numVentana].finLista +1;
 							}
 							else
 							{
@@ -650,7 +651,7 @@ void Gramatica()
 									if(Ventanas[numVentana].finLista < 30)
 									{
 										Ventanas[numVentana].List[Ventanas[numVentana].finLista].comando = 4;
-										Ventanas[numVentana].finLista++;
+										Ventanas[numVentana].finLista = Ventanas[numVentana].finLista +1;
 									}
 									else
 									{
@@ -786,7 +787,7 @@ void Ventana()
 			if(Ventanas[PCBActual].inicioLista != Ventanas[PCBActual].finLista)
 			{
 				Acciones(Ventanas[PCBActual].List[Ventanas[PCBActual].inicioLista]);
-				Ventanas[PCBActual].inicioLista++;
+				Ventanas[PCBActual].inicioLista = Ventanas[PCBActual].inicioLista + 1;
 			}
 			else
 			{
