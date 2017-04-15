@@ -875,8 +875,9 @@ void Acciones(ToDo com)
 			int _posX = 10;
 			int _posY = 22;
 			gotoxy(_posX, _posY);
-			printf("Quantum de Ventana: ");
+			printf("Quantum de Ventana");
 			printf("%d", PCBActual);
+			printf(": ");
 			printf("%d", Ventanas[PCBActual].quantum );
 			gotoxy(posX, posY);
 		}break;
