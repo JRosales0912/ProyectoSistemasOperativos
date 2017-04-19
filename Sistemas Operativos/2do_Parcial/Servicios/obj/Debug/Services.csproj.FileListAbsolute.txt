@@ -1,0 +1,4 @@
+C:\Users\Cesar\Dropbox\URL\SO\Proyecto\Sistemas Operativos\2do_Parcial\Servicios\bin\Debug\Servicios.dll
+C:\Users\Cesar\Dropbox\URL\SO\Proyecto\Sistemas Operativos\2do_Parcial\Servicios\bin\Debug\Servicios.pdb
+C:\Users\Cesar\Dropbox\URL\SO\Proyecto\Sistemas Operativos\2do_Parcial\Servicios\obj\Debug\Servicios.dll
+C:\Users\Cesar\Dropbox\URL\SO\Proyecto\Sistemas Operativos\2do_Parcial\Servicios\obj\Debug\Servicios.pdb

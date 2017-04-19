@@ -1,0 +1,11 @@
+C:\Users\Cesar\Dropbox\URL\SO\Proyecto\Sistemas Operativos\2do_Parcial\2do_Parcial\bin\Debug\2do_Parcial.exe.config
+C:\Users\Cesar\Dropbox\URL\SO\Proyecto\Sistemas Operativos\2do_Parcial\2do_Parcial\bin\Debug\2do_Parcial.exe
+C:\Users\Cesar\Dropbox\URL\SO\Proyecto\Sistemas Operativos\2do_Parcial\2do_Parcial\bin\Debug\2do_Parcial.pdb
+C:\Users\Cesar\Dropbox\URL\SO\Proyecto\Sistemas Operativos\2do_Parcial\2do_Parcial\obj\Debug\_2do_Parcial.Properties.Resources.resources
+C:\Users\Cesar\Dropbox\URL\SO\Proyecto\Sistemas Operativos\2do_Parcial\2do_Parcial\obj\Debug\2do_Parcial.csproj.GenerateResource.Cache
+C:\Users\Cesar\Dropbox\URL\SO\Proyecto\Sistemas Operativos\2do_Parcial\2do_Parcial\obj\Debug\2do_Parcial.exe
+C:\Users\Cesar\Dropbox\URL\SO\Proyecto\Sistemas Operativos\2do_Parcial\2do_Parcial\obj\Debug\2do_Parcial.pdb
+C:\Users\Cesar\Dropbox\URL\SO\Proyecto\Sistemas Operativos\2do_Parcial\2do_Parcial\bin\Debug\Servicios.dll
+C:\Users\Cesar\Dropbox\URL\SO\Proyecto\Sistemas Operativos\2do_Parcial\2do_Parcial\bin\Debug\Servicios.pdb
+C:\Users\Cesar\Dropbox\URL\SO\Proyecto\Sistemas Operativos\2do_Parcial\2do_Parcial\obj\Debug\2do_Parcial.csprojResolveAssemblyReference.cache
+C:\Users\Cesar\Dropbox\URL\SO\Proyecto\Sistemas Operativos\2do_Parcial\2do_Parcial\obj\Debug\_2do_Parcial.Chat.resources

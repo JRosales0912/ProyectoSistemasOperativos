@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.4
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "2do_Parcial", "2do_Parcial\2do_Parcial.csproj", "{7813DC12-C5CC-43DD-9996-CBA71E04B9C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "Servicios\Services.csproj", "{44A0B0B6-D2EA-49FE-B624-6DA3708E3F47}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7813DC12-C5CC-43DD-9996-CBA71E04B9C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7813DC12-C5CC-43DD-9996-CBA71E04B9C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7813DC12-C5CC-43DD-9996-CBA71E04B9C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7813DC12-C5CC-43DD-9996-CBA71E04B9C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44A0B0B6-D2EA-49FE-B624-6DA3708E3F47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44A0B0B6-D2EA-49FE-B624-6DA3708E3F47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44A0B0B6-D2EA-49FE-B624-6DA3708E3F47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44A0B0B6-D2EA-49FE-B624-6DA3708E3F47}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
